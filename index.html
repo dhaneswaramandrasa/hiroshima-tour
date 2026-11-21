@@ -90,7 +90,7 @@
 
 <h3>All spots</h3>
 <div class="list" id="list"></div>
-<p class="note">Pins checked against OpenStreetMap. Map © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Photos from Wikimedia Commons (see <a href="img/CREDITS.md">credits</a>); #6 from the guide booklet. Works offline except the map tiles.</p>
+<p class="note">Pins checked against OpenStreetMap. Map © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Photos from Wikimedia Commons (see <a href="https://github.com/dhaneswaramandrasa/hiroshima-tour/blob/main/img/CREDITS.md" target="_blank" rel="noopener">credits</a>); #6 from the guide booklet. Works offline except the map tiles.</p>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -292,6 +292,7 @@ if (HAS_MAP){
   const P = SPOTS.map(s=>[s.lat,s.lon]);
   const parkBounds = L.latLngBounds(P).pad(0.04);
   map.fitBounds(parkBounds);
+  window.addEventListener("load",()=>{ map.invalidateSize(); map.fitBounds(parkBounds); });
 
   // sight line: Cenotaph -> Flame of Peace -> A-bomb Dome
   const c = SPOTS.find(s=>s.n===10), d = SPOTS.find(s=>s.n===1);

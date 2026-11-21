@@ -1,5 +1,5 @@
 // Offline backup: caches the page, photos and Leaflet. Map tiles stay online-only.
-const CACHE = "peace-park-v1";
+const CACHE = "peace-park-v2";
 const LOCAL = [
   "./", "./index.html", "./img/CREDITS.md",
   "./img/01.jpg", "./img/01b.jpg", "./img/02.jpg", "./img/03.jpg", "./img/04.jpg", "./img/05.jpg",
