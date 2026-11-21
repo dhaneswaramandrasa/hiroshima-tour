@@ -1,5 +1,5 @@
 // Offline backup: caches the page, photos and Leaflet. Map tiles stay online-only.
-const CACHE = "peace-park-v2";
+const CACHE = "peace-park-v3";
 const LOCAL = [
   "./", "./index.html", "./img/CREDITS.md",
   "./img/01.jpg", "./img/01b.jpg", "./img/02.jpg", "./img/03.jpg", "./img/04.jpg", "./img/05.jpg",
@@ -7,8 +7,8 @@ const LOCAL = [
   "./img/12.jpg", "./img/13.jpg", "./img/14.jpg", "./img/15.jpg"
 ];
 const CDN = [
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css",
+  "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
 ];
 
 self.addEventListener("install", e => {
