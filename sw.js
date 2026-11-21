@@ -1,8 +1,8 @@
 // Offline backup: caches the page, photos and Leaflet. Map tiles stay online-only.
-const CACHE = "peace-park-v4";
+const CACHE = "peace-park-v5";
 const LOCAL = [
   "./", "./index.html", "./img/CREDITS.md",
-  "./img/01.jpg", "./img/01b.jpg", "./img/02.jpg", "./img/02b.jpg", "./img/03.jpg", "./img/04.jpg", "./img/05.jpg", "./img/06.jpg", "./img/07.jpg", "./img/08.jpg", "./img/09.jpg", "./img/10.jpg", "./img/11.jpg", "./img/12.jpg", "./img/13.jpg", "./img/14.jpg", "./img/15.jpg", "./img/16.jpg"
+  "./img/a-bomb-dome.jpg", "./img/industrial-promotion-hall-1915.jpg", "./img/hypocenter-marker.jpg", "./img/shima-hospital-1943.jpg", "./img/peace-clock-tower.jpg", "./img/memorial-mound.jpg", "./img/korean-victims-monument.jpg", "./img/childrens-peace-monument.jpg", "./img/peace-fountain.jpg", "./img/peace-bell.jpg", "./img/flame-of-peace.jpg", "./img/pond-of-peace.jpg", "./img/cenotaph.jpg", "./img/peace-memorial-museum.jpg", "./img/peace-watch.jpg", "./img/mother-and-child.jpg", "./img/fountain-of-prayer.jpg", "./img/gates-of-peace.jpg"
 ];
 const CDN = [
   "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css",
@@ -12,7 +12,8 @@ const CDN = [
 self.addEventListener("install", e => {
   e.waitUntil((async () => {
     const c = await caches.open(CACHE);
-    await c.addAll(LOCAL);
+    // cache:"reload" skips the browser HTTP cache so a new version never stores stale files
+    await c.addAll(LOCAL.map(u => new Request(u, {cache: "reload"})));
     // CDN files are best-effort so one network hiccup can't break the install
     await Promise.all(CDN.map(u => c.add(new Request(u, {mode: "cors"})).catch(() => {})));
     self.skipWaiting();
@@ -36,7 +37,7 @@ self.addEventListener("fetch", e => {
   if (req.mode === "navigate") {
     e.respondWith((async () => {
       try {
-        const res = await fetch(req);
+        const res = await fetch(req, {cache: "no-cache"}); // revalidate with the server every time
         if (res.ok) (await caches.open(CACHE)).put("./index.html", res.clone());
         return res;
       } catch {
