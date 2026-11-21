@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17191c" media="(prefers-color-scheme: dark)">
+<title>Peace Park Tour Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root{
+    --bg:#f6f4ef; --ink:#1f2328; --muted:#5f6670; --card:#ffffff; --line:#e3ded4; --land:#ece8df;
+    --pin:#b5452d; --pin-active:#1f2328; --accent:#b5452d; --me:#1a73e8;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#17191c; --ink:#eceae5; --muted:#a3a9b1; --card:#22252a; --line:#33373d; --land:#23262a;
+      --pin:#e0735a; --pin-active:#f3efe6; --accent:#e0735a; --me:#4c9bff;
+    }
+    .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+    .leaflet-container{background:#1d2023}
+    .leaflet-bar a,.leaflet-control-attribution{background:var(--card)!important;color:var(--ink)!important}
+    .leaflet-control-attribution a{color:var(--muted)!important}
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{padding:14px 16px 6px}
+  h1{font-size:19px;margin:0}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .wrap{max-width:720px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom)}
+  .mapbox{position:relative;margin:8px 12px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--land)}
+  #map{height:58vh;min-height:320px;max-height:620px}
+  .nomap{padding:24px 16px;color:var(--muted);font-size:14px}
+  /* numbered pins: 44px tap area, 30px visual dot */
+  .pinicon{background:none;border:0}
+  .pinicon .hit{width:44px;height:44px;display:grid;place-items:center}
+  .pinicon .dot{width:30px;height:30px;border-radius:50%;background:var(--pin);color:#fff;font-weight:700;font-size:14px;display:grid;place-items:center;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+  .pinicon.active .dot{background:var(--pin-active);color:var(--bg);width:36px;height:36px;font-size:16px}
+  .medot{width:18px;height:18px;border-radius:50%;background:var(--me);border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,115,232,.35),0 1px 4px rgba(0,0,0,.4)}
+  .mapbtns{position:absolute;right:10px;bottom:22px;z-index:500;display:flex;flex-direction:column;gap:8px}
+  .mapbtns button{min-height:44px;min-width:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;font-weight:600;box-shadow:0 1px 5px rgba(0,0,0,.25);cursor:pointer}
+  .mapbtns button.on{background:var(--me);color:#fff;border-color:var(--me)}
+  .leaflet-touch .leaflet-bar a{width:44px;height:44px;line-height:44px;font-size:22px}
+  .toast{position:absolute;left:66px;right:10px;top:10px;z-index:600;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.2);display:none}
+  .card{margin:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;scroll-margin-top:8px}
+  .photos{display:flex;gap:8px;margin:0 0 4px}
+  .photos figure{flex:1;min-width:0;margin:0}
+  .photos img{display:block;width:100%;height:210px;object-fit:cover;border-radius:10px;background:var(--line)}
+  .credit{color:var(--muted);font-size:11px;line-height:1.35;margin:3px 2px 0;overflow-wrap:anywhere}
+  .credit a{color:inherit}
+  .cap{color:var(--muted);font-size:12px;margin:2px 0 8px}
+  .card h2{font-size:18px;margin:8px 0 2px}
+  .card .where{color:var(--muted);font-size:13px;margin-bottom:8px}
+  .card .dist{color:var(--me);font-size:13px;font-weight:600;margin:-4px 0 8px}
+  .card ul,.card ol{margin:6px 0 0;padding-left:20px}
+  .card li{margin:4px 0}
+  .card .quote{border-left:3px solid var(--accent);padding:4px 10px;margin:10px 0;font-style:italic}
+  .row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:0 14px;font-size:15px;text-decoration:none;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);flex:1 1 100%}
+  .btn.half{flex:1 1 0}
+  h3{font-size:14px;margin:16px 16px 0;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .list{margin:6px 12px 16px}
+  .list button{display:flex;gap:10px;align-items:center;width:100%;min-height:48px;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 4px;color:var(--ink);font-size:15px;cursor:pointer}
+  .num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--pin);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center}
+  .list button.active .num{background:var(--pin-active);color:var(--bg)}
+  .list .d{margin-left:auto;color:var(--muted);font-size:12px}
+  .note{color:var(--muted);font-size:12px;margin:4px 16px 24px}
+  .note a{color:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Peace Park Tour Map</h1>
+  <div class="sub">Tap a number for its key facts. Numbers follow a north-to-south walking order.</div>
+</header>
+
+<div class="mapbox">
+  <div id="map"></div>
+  <div class="mapbtns" id="mapbtns" hidden>
+    <button id="locate" type="button" aria-label="Locate me">📍 Locate me</button>
+    <button id="fit" type="button" aria-label="Fit whole park">Fit park</button>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<div class="card" id="card"></div>
+
+<h3>All spots</h3>
+<div class="list" id="list"></div>
+<p class="note">Pins checked against OpenStreetMap. Map © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Photos from Wikimedia Commons (see <a href="img/CREDITS.md">credits</a>); #6 from the guide booklet. Works offline except the map tiles.</p>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+const SPOTS = [
+  {n:1, lat:34.395471, lon:132.45358, name:"A-bomb Dome", q:"Atomic Bomb Dome Hiroshima",
+   where:"East bank of the Motoyasu River, by the T-shaped Aioi Bridge",
+   html:`<ol>
+<li><b>It started as a symbol of modern Hiroshima.</b> Opened April 5, 1915 as the Prefectural Commercial Exhibition Hall. Designed by Czech architect <b>Jan Letzel</b> in the European Secession style. It showed and sold local products, then hosted art exhibitions.</li>
+<li><b>Its name and use changed.</b> Renamed in 1921; in 1933 it became the <b>Hiroshima Prefectural Industrial Promotion Hall</b>. In wartime, exhibitions stopped and government offices moved in.</li>
+<li><b>August 6, 1945.</b> The bomb exploded almost directly above it. About <b>30 people inside all died</b>. Only the walls and the dome's steel frame were left. <i>(extra: hypocenter about 160 m away, explosion about 600 m up, so the blast pushed down, not sideways.)</i></li>
+<li><b>Keeping it was the people's choice.</b> 1966: city assembly voted to preserve it. Mayor Hamai raised money nationwide, plus donations from the USA, USSR, France, India and England. First preservation finished 1967. Second renovation 1989–90: target ¥100 million, about <b>¥395 million</b> donated.</li>
+<li><b>UNESCO World Heritage Site.</b> Registered <b>Dec 7, 1996</b> as "Hiroshima Peace Memorial (Genbaku Dome)", after a citizens' petition. Itsukushima Shrine (Miyajima) was registered the same day.</li>
+</ol>
+<div class="quote">"It was built to show Hiroshima's future. Now it shows the world what must never happen again."</div>`},
+  {n:2, lat:34.395409, lon:132.452368, name:"Peace Clock Tower", q:"Peace Clock Tower Hiroshima Peace Memorial Park",
+   where:"North tip of the park, near Aioi Bridge",
+   html:`<ul><li>Built by the Hiroshima Rijō Lions Club, dedicated Oct 28, 1967.</li><li>Chimes at <b>8:15 every morning</b>, the moment the bomb exploded, as a "No More Hiroshimas" call.</li></ul>`},
+  {n:3, lat:34.394654, lon:132.452021, name:"Atomic Bomb Memorial Mound", q:"Atomic Bomb Memorial Mound Hiroshima",
+   where:"Northwest corner of the park",
+   html:`<ul><li>Holds the ashes of about <b>70,000 victims</b>, most never identified.</li><li>Bodies were brought here right after the bombing because it was near the center, and cremated by rescue squads.</li><li>Modeled after a Momoyama-era imperial mausoleum. Interfaith ceremony here every Aug 6.</li></ul>`},
+  {n:4, lat:34.394135, lon:132.451829, name:"Korean Victims Monument", q:"Monument in Memory of the Korean Victims of the A-bomb",
+   where:"South of the Memorial Mound",
+   html:`<ul><li>About <b>30,000–40,000 Koreans</b> were in Hiroshima at the bombing, residents and forced laborers.</li><li>Built 1970 outside the park; criticized as discrimination, then moved inside in <b>1999</b>.</li><li>Tower on a turtle-shaped base, about 5 m and 10 tons, made of Korean stone. Names Prince Lee-Woo, who died the day after the bombing.</li></ul>`},
+  {n:5, lat:34.394135, lon:132.452757, name:"Children's Peace Monument", q:"Children's Peace Monument Hiroshima",
+   where:"Center of the park, surrounded by paper-crane booths",
+   html:`<ul><li>For <b>Sadako Sasaki</b>, exposed as a small child, who died of leukemia in 1955. She folded paper cranes believing 1,000 would bring recovery.</li><li>Her classmates started a campaign; more than <b>3,200 schools</b> donated. Unveiled <b>May 5, 1958</b> (Children's Day).</li><li>9 m tall, a girl holding a golden crane on top. Bell inside donated by Nobel laureate Dr. Hideki Yukawa.</li></ul>
+<div class="quote">"This is our cry. This is our prayer. For building peace in this world."</div>`},
+  {n:6, lat:34.394041, lon:132.45261, name:"Peace Fountain", q:"Peace Fountain Hiroshima Peace Memorial Park",
+   where:"Near the Children's Peace Monument, toward the Honkawa River",
+   html:`<ul><li>Built Sept 1, 1960 by the Hiroshima Junior Chamber of Commerce.</li><li>For students who were clearing buildings by the river when the bomb fell. The wounded children cried out for water.</li></ul>`},
+  {n:7, lat:34.394872, lon:132.452414, name:"Peace Bell", q:"Peace Bell Hiroshima Peace Memorial Park",
+   where:"East side of the park, near the Motoyasu River",
+   html:`<ul><li>First rung Sept 20, 1964. Made by master bell-maker Masahiko Katori.</li><li>Engraved with a <b>world map with no national borders</b> ("One World").</li><li>Dome-shaped belfry represents the universe. <b>Visitors may ring it freely.</b></li></ul>`},
+  {n:8, lat:34.39345, lon:132.452745, name:"Flame of Peace", q:"Flame of Peace Hiroshima",
+   where:"North end of the Pond of Peace",
+   html:`<ul><li>Lit Aug 1, 1964. Designed by Kenzo Tange.</li><li>Will <b>burn until every nuclear weapon is gone</b>.</li><li>Pedestal looks like two hands opening upward. Lit from flames of 35 temples and shrines plus Japanese industry.</li></ul>`},
+  {n:9, lat:34.393214, lon:132.45266, name:"Pond of Peace", q:"Pond of Peace Hiroshima",
+   where:"Between the Flame and the Cenotaph",
+   html:`<ul><li>Gift from the Japan Junior Chamber of Commerce, completed July 31, 1957.</li><li>Makes the Cenotaph look like it is <b>floating</b>. Enlarged in 1964 to about 17 m × 70 m.</li></ul>`},
+  {n:10, lat:34.392972, lon:132.452571, name:"Cenotaph for the A-bomb Victims", q:"Cenotaph for the A-bomb Victims Hiroshima",
+   where:"Center of the park, in front of the Museum",
+   html:`<ul><li>Unveiled Aug 6, 1952. Designed by <b>Kenzo Tange</b>, shaped like an ancient clay house to shelter the souls.</li><li>Stone chest inside holds the register of names (308,725 as of 2017, and it grows every year).</li><li>Rebuilt in granite in 1985, same size and shape.</li><li><b>Tip:</b> stand behind it. The Cenotaph, Flame and Dome line up (dashed line on the map).</li></ul>
+<div class="quote">"Let all the souls here rest in peace; for we shall not repeat the evil." Here "we" means all of humanity.</div>`},
+  {n:11, lat:34.391812, lon:132.452102, name:"Peace Memorial Museum", q:"Hiroshima Peace Memorial Museum",
+   where:"Main Building (on pillars) plus East Building",
+   html:`<ul><li>Main Building designed by Kenzo Tange, completed 1955, raised on pillars so you can see the Cenotaph through it.</li><li>Began with <b>Shōgo Nagaoka</b>, who collected melted tiles and objects from the ruins right after the bombing.</li><li>East Building opened in its current form in 1994.</li></ul>`},
+  {n:12, lat:34.391548, lon:132.453098, name:"Peace Watch", q:"Hiroshima Peace Memorial Museum East Building",
+   where:"1st-floor lobby, Museum East Building",
+   html:`<ul><li>Unveiled Aug 6, 2001.</li><li>Top counter: <b>days since the bombing</b>. Lower counter: <b>days since the last nuclear test</b>, reset to zero after every test.</li></ul>`},
+  {n:13, lat:34.39111, lon:132.451848, name:"Mother and Child in the Storm", q:"Statue of Mother and Child in the Storm Hiroshima",
+   where:"Greenbelt in front of the Museum Main Building",
+   html:`<ul><li>Bronze by Shin Hongō, erected Aug 5, 1960.</li><li>A mother holds a baby and shields another child, <b>leaning forward against the storm</b>, determined to survive.</li></ul>`},
+  {n:14, lat:34.391394, lon:132.451959, name:"Fountain of Prayer", q:"Fountain of Prayer Hiroshima",
+   where:"Between the Museum and Peace Boulevard",
+   html:`<ul><li>Built Nov 1964 by Hiroshima Bank.</li><li>For victims who died crying <b>"Water! Water!"</b></li><li>567 jets, water up to 10 m; lit in five colors at night.</li></ul>`},
+  {n:15, lat:34.390631, lon:132.451715, name:"Gates of Peace", q:"Gates of Peace Hiroshima",
+   where:"Along Peace Boulevard, east of the Museum",
+   html:`<ul><li>Completed July 2005 for the 60th anniversary, by Clara Halter and Jean-Michel Wilmotte.</li><li>10 gates: Dante's nine circles of hell + the hell of Hiroshima.</li><li>The word "peace" is written in <b>49 languages</b>. Lit up at night.</li></ul>`}
+];
+
+const PHOTOS = {
+"1": [
+{
+"src": "img/01.jpg",
+"credit": "Photo: Balon Greyjoy · CC0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:20190317_Atomic_Bomb_Dome-1.jpg",
+"alt": "A-bomb Dome today"
+},
+{
+"src": "img/01b.jpg",
+"credit": "Photo: 広島藤谷□○堂 · Public domain · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:05_%E5%BA%83%E5%B3%B6%E7%9C%8C%E7%89%A9%E7%94%A3%E9%99%B3%E5%88%97%E9%A4%A8%EF%BC%88%E5%85%A8%E6%99%AF%EF%BC%89_70118_001.jpg",
+"alt": "Hiroshima Prefectural Commercial Exhibition Hall, about 1915"
+}
+],
+"2": [
+{
+"src": "img/02.jpg",
+"credit": "Photo: そらみみ · CC BY-SA 4.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Hiroshima_Peace_Clock_Tower_20170310.jpg"
+}
+],
+"3": [
+{
+"src": "img/03.jpg",
+"credit": "Photo: Hyppolyte de Saint-Rambert · CC BY 4.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Hiroshima_Atomic_Bomb_Memorial_Mound_hdsr_S5_01.jpg"
+}
+],
+"4": [
+{
+"src": "img/04.jpg",
+"credit": "Photo: Samudes · CC BY-SA 4.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Korean_Victims_and_Survivors_Memorial_Monument.jpg"
+}
+],
+"5": [
+{
+"src": "img/05.jpg",
+"credit": "Photo: Hyppolyte de Saint-Rambert · CC BY 4.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Hiroshima_Peace_Memorial_park_hdsr_Childrens_for_peace_S5_08.jpg"
+}
+],
+"6": [
+{
+"src": "img/06.jpg",
+"credit": "Photo: guide booklet"
+}
+],
+"7": [
+{
+"src": "img/07.jpg",
+"credit": "Photo: そらみみ · CC BY-SA 4.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Hiroshima_Peace_Bell_20170310.jpg"
+}
+],
+"8": [
+{
+"src": "img/08.jpg",
+"credit": "Photo: Maarten Heerlien from Voorschoten, The Netherlands · CC BY 2.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Hiroshima_Peace_flame_(6155600507).jpg"
+}
+],
+"9": [
+{
+"src": "img/09.jpg",
+"credit": "Photo: Ajay Suresh from New York, NY, USA · CC BY 2.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Peace_Pond_(28217906498).jpg"
+}
+],
+"10": [
+{
+"src": "img/10.jpg",
+"credit": "Photo: そらみみ · CC BY-SA 4.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Hiroshima_Cenotaph_20170310.jpg"
+}
+],
+"11": [
+{
+"src": "img/11.jpg",
+"credit": "Photo: そらみみ · CC BY-SA 4.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Hiroshima_Peace_Memorial_Museum_20170310-5.jpg"
+}
+],
+"12": [
+{
+"src": "img/12.jpg",
+"credit": "Photo: ja:User:Sanjo · CC BY-SA 3.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Peace_Watch_Tower_in_Hiroshima.JPG"
+}
+],
+"13": [
+{
+"src": "img/13.jpg",
+"credit": "Photo: Samudes · CC BY-SA 4.0 (cropped) · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Hiroshima_Peace_Memorial_Park_-_mother_and_child_in_the_storm.jpg"
+}
+],
+"14": [
+{
+"src": "img/14.jpg",
+"credit": "Photo: かるちる · CC0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Fountain_of_Prayer_at_Hiroshima_Peace_Memorial_Park.jpg"
+}
+],
+"15": [
+{
+"src": "img/15.jpg",
+"credit": "Photo: Arnaud Malon · CC BY 2.0 · Wikimedia Commons",
+"page": "https://commons.wikimedia.org/wiki/File:Hiroshima_peace_gates.jpg"
+}
+]
+};
+
+const gmaps = (lat,lon) => `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+const $ = id => document.getElementById(id);
+const list = $("list"), card = $("card");
+const HAS_MAP = typeof L !== "undefined";
+let cur = 0, me = null, map = null, meMarker = null, meAcc = null, watchId = null, follow = false;
+
+function toast(msg, ms=3500){
+  const t=$("toast"); t.textContent=msg; t.style.display="block";
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.display="none", ms);
+}
+function dist(a,b){ // metres, equirectangular is plenty at park scale
+  const R=6371000, toR=Math.PI/180, x=(b.lon-a.lon)*toR*Math.cos((a.lat+b.lat)/2*toR), y=(b.lat-a.lat)*toR;
+  return Math.round(Math.hypot(x,y)*R);
+}
+const fmt = m => m<1000 ? `${m} m` : `${(m/1000).toFixed(1)} km`;
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- map ---------- */
+if (HAS_MAP){
+  map = L.map("map",{zoomControl:true, zoomSnap:0.25}).setView([34.3932,132.4527],17);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    maxZoom:19, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+  const P = SPOTS.map(s=>[s.lat,s.lon]);
+  const parkBounds = L.latLngBounds(P).pad(0.04);
+  map.fitBounds(parkBounds);
+
+  // sight line: Cenotaph -> Flame of Peace -> A-bomb Dome
+  const c = SPOTS.find(s=>s.n===10), d = SPOTS.find(s=>s.n===1);
+  L.polyline([[c.lat,c.lon],[d.lat,d.lon]],{color:"#b5452d",weight:3,opacity:.75,dashArray:"8 10",interactive:false}).addTo(map);
+
+  SPOTS.forEach((s,i)=>{
+    const icon = active => L.divIcon({className:"pinicon"+(active?" active":""),iconSize:[44,44],iconAnchor:[22,22],
+      html:`<div class="hit"><div class="dot">${s.n}</div></div>`});
+    s.icon = icon;
+    s.m = L.marker([s.lat,s.lon],{icon:icon(false),title:s.name,alt:s.name,keyboard:true,riseOnHover:true})
+      .addTo(map).on("click",e=>show(nearestPin(e,i),false));
+  });
+
+  // Pins close together have overlapping 44px tap areas: pick the one whose centre is nearest the finger.
+  function nearestPin(e, fallback){
+    if (!e.originalEvent) return fallback;
+    const tp = map.mouseEventToContainerPoint(e.originalEvent);
+    let best=fallback, bd=Infinity;
+    SPOTS.forEach((s,j)=>{ const d=map.latLngToContainerPoint([s.lat,s.lon]).distanceTo(tp); if(d<bd){bd=d;best=j;} });
+    return best;
+  }
+  $("mapbtns").hidden = false;
+  $("fit").onclick = ()=>{ follow=false; $("locate").classList.remove("on"); map.fitBounds(parkBounds); };
+  $("locate").onclick = ()=>{
+    follow = true; $("locate").classList.add("on");
+    if (me) map.setView([me.lat,me.lon], Math.max(map.getZoom(),17));
+    else toast("Finding your location…");
+    startWatch(true);
+  };
+  map.on("dragstart",()=>{ follow=false; $("locate").classList.remove("on"); });
+} else {
+  $("map").outerHTML = '<div class="nomap">Map unavailable offline. The spot list and fact cards below still work.</div>';
+}
+
+/* ---------- GPS ---------- */
+function startWatch(userAsked){
+  if (watchId!==null) return;
+  if (!("geolocation" in navigator)){ if(userAsked) toast("This browser has no GPS access."); return; }
+  watchId = navigator.geolocation.watchPosition(pos=>{
+    const first = !me;
+    if (first) $("toast").style.display="none";
+    me = {lat:pos.coords.latitude, lon:pos.coords.longitude, acc:pos.coords.accuracy};
+    if (map){
+      const ll=[me.lat,me.lon];
+      if(!meMarker){
+        meAcc = L.circle(ll,{radius:me.acc,color:"#1a73e8",weight:1,fillOpacity:.12,interactive:false}).addTo(map);
+        meMarker = L.marker(ll,{icon:L.divIcon({className:"",html:'<div class="medot"></div>',iconSize:[18,18],iconAnchor:[9,9]}),interactive:false,zIndexOffset:1000}).addTo(map);
+      } else { meMarker.setLatLng(ll); meAcc.setLatLng(ll).setRadius(me.acc); }
+      if (follow) map.setView(ll, first ? Math.max(map.getZoom(),17) : map.getZoom());
+    }
+    updateDistances();
+  }, err=>{
+    watchId = null; follow=false; $("locate") && $("locate").classList.remove("on");
+    if (userAsked || err.code!==1) toast(err.code===1 ? "Location permission denied. Allow it in your browser settings to see the blue dot." : "Couldn't get your location yet. Try again in the open.");
+  }, {enableHighAccuracy:true, maximumAge:5000, timeout:20000});
+}
+// start silently if permission was granted before
+if (navigator.permissions && navigator.permissions.query){
+  navigator.permissions.query({name:"geolocation"}).then(r=>{ if(r.state==="granted") startWatch(false); }).catch(()=>{});
+}
+
+function updateDistances(){
+  if(!me) return;
+  SPOTS.forEach(s=>{ s.dEl.textContent = fmt(dist(me,s)); });
+  const el=$("dist"); if(el) el.textContent = `≈ ${fmt(dist(me,SPOTS[cur]))} from you`;
+}
+
+/* ---------- list + card ---------- */
+SPOTS.forEach((s,i)=>{
+  const b = document.createElement("button");
+  b.type="button";
+  b.innerHTML = `<span class="num">${s.n}</span><span>${esc(s.name)}</span><span class="d"></span>`;
+  b.addEventListener("click",()=>show(i,true));
+  list.appendChild(b);
+  s.b = b; s.dEl = b.querySelector(".d");
+});
+
+function photoHTML(s){
+  const ps = PHOTOS[s.n] || [];
+  const figs = ps.map(p=>`<figure><img src="${p.src}" alt="${esc(p.alt||s.name)}" loading="lazy" decoding="async">
+    <figcaption class="credit">${p.page?`<a href="${p.page}" target="_blank" rel="noopener">${esc(p.credit)}</a>`:esc(p.credit)}</figcaption></figure>`).join("");
+  return `<div class="photos">${figs}</div>`;
+}
+
+function show(i, scroll){
+  cur = i;
+  const s = SPOTS[i];
+  SPOTS.forEach((t,j)=>{
+    t.b.classList.toggle("active",j===i);
+    if (t.m) { t.m.setIcon(t.icon(j===i)); t.m.setZIndexOffset(j===i?500:0); }
+  });
+  card.innerHTML = `${photoHTML(s)}${s.n===1?'<div class="cap">Left: the ruins today · Right: the hall before 1945</div>':''}
+  <h2>${s.n}. ${esc(s.name)}</h2><div class="where">📍 ${esc(s.where)}</div>${me?`<div class="dist" id="dist"></div>`:'<div id="dist" class="dist" hidden></div>'}${s.html}
+  <div class="row">
+    <a class="btn primary" href="${gmaps(s.lat,s.lon)}" target="_blank" rel="noopener">Open in Google Maps</a>
+    <button class="btn half" type="button" id="prev">‹ Prev</button>
+    <button class="btn half" type="button" id="next">Next ›</button>
+  </div>`;
+  $("prev").onclick = ()=>go(-1);
+  $("next").onclick = ()=>go(1);
+  if (me) { $("dist").hidden=false; updateDistances(); }
+  if (map && scroll) map.panTo([s.lat,s.lon]);
+  if (scroll) card.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function go(step){
+  const i=(cur+step+SPOTS.length)%SPOTS.length;
+  follow=false; $("locate") && $("locate").classList.remove("on");
+  show(i,true);
+}
+show(0,false);
+
+/* ---------- offline ---------- */
+if ("serviceWorker" in navigator && location.protocol!=="file:"){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
