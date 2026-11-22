@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17191c" media="(prefers-color-scheme: dark)">
+<title>Miyajima Tour Map</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" crossorigin="">
+<style>
+  :root{
+    --bg:#f6f4ef; --ink:#1f2328; --muted:#5f6670; --card:#ffffff; --line:#e3ded4; --land:#ece8df;
+    --pin:#b5452d; --pin-active:#1f2328; --accent:#b5452d; --me:#1a73e8;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#17191c; --ink:#eceae5; --muted:#a3a9b1; --card:#22252a; --line:#33373d; --land:#23262a;
+      --pin:#e0735a; --pin-active:#f3efe6; --accent:#e0735a; --me:#4c9bff;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{padding:14px 16px 6px}
+  h1{font-size:19px;margin:0}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .wrap{max-width:720px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom)}
+  .mapbox{position:relative;margin:8px 12px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--land)}
+  #map{height:58vh;min-height:320px;max-height:620px}
+  .nomap{padding:24px 16px;color:var(--muted);font-size:14px}
+  /* numbered pins: 44px tap area, 30px visual dot */
+  .pinicon{background:none;border:0;cursor:pointer}
+  .pinicon.active{z-index:5}
+  .pinicon .hit{width:44px;height:44px;display:grid;place-items:center}
+  .pinicon .dot{width:30px;height:30px;border-radius:50%;background:var(--pin);color:#fff;font-weight:700;font-size:14px;display:grid;place-items:center;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+  .pinicon.active .dot{background:var(--pin-active);color:var(--bg);width:36px;height:36px;font-size:16px}
+  .medot{width:18px;height:18px;border-radius:50%;background:var(--me);border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,115,232,.35),0 1px 4px rgba(0,0,0,.4)}
+  .mapbtns{display:flex;gap:8px;padding:8px;border-top:1px solid var(--line);background:var(--card)}
+  .maplibregl-canvas{outline:none}
+  .mapbtns button{flex:1;min-height:44px;min-width:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
+  .mapbtns[hidden]{display:none}
+  .mapbtns button.on{background:var(--me);color:#fff;border-color:var(--me)}
+  .maplibregl-ctrl-group button{width:44px!important;height:44px!important}
+  .maplibregl-ctrl-attrib{font-size:11px}
+  @media (prefers-color-scheme: dark){ .maplibregl-ctrl-group{background:var(--card)} .maplibregl-ctrl-group button .maplibregl-ctrl-icon{filter:invert(1)} .maplibregl-ctrl-attrib{background:rgba(34,37,42,.8)!important;color:var(--muted)} .maplibregl-ctrl-attrib a{color:var(--muted)!important} }
+  .toast{position:absolute;left:66px;right:10px;top:10px;z-index:600;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.2);display:none}
+  .card{margin:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;scroll-margin-top:8px}
+  .photos{display:flex;gap:8px;margin:0 0 4px}
+  .photos figure{flex:1;min-width:0;margin:0}
+  .photos img{display:block;width:100%;height:210px;object-fit:cover;border-radius:10px;background:var(--line)}
+  .credit{color:var(--muted);font-size:11px;line-height:1.35;margin:3px 2px 0;overflow-wrap:anywhere}
+  .credit a{color:inherit}
+  .cap{color:var(--muted);font-size:12px;margin:2px 0 8px}
+  .card h2{font-size:18px;margin:8px 0 2px}
+  .card .where{color:var(--muted);font-size:13px;margin-bottom:8px}
+  .card .dist{color:var(--me);font-size:13px;font-weight:600;margin:-4px 0 8px}
+  .card ul,.card ol{margin:6px 0 0;padding-left:20px}
+  .card li{margin:4px 0}
+  .card .quote{border-left:3px solid var(--accent);padding:4px 10px;margin:10px 0;font-style:italic}
+  .row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:0 14px;font-size:15px;text-decoration:none;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);flex:1 1 100%}
+  .btn.half{flex:1 1 0}
+  h3{font-size:14px;margin:16px 16px 0;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .list{margin:6px 12px 16px}
+  .list button{display:flex;gap:10px;align-items:center;width:100%;min-height:48px;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 4px;color:var(--ink);font-size:15px;cursor:pointer}
+  .num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--pin);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center}
+  .list button.active .num{background:var(--pin-active);color:var(--bg)}
+  .list .d{margin-left:auto;color:var(--muted);font-size:12px}
+  .note{color:var(--muted);font-size:12px;margin:4px 16px 24px}
+  .note a{color:inherit}
+  .sub a{color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Miyajima Tour Map</h1>
+  <div class="sub">Tap a number for its key facts. Numbers follow the walking order: pier → shrine → temples → ropeway → Misen. <a href="https://www.miyajima.or.jp/english/sio/sio.php" target="_blank" rel="noopener">Tide times</a> · <a href="../">Peace Park tour</a></div>
+</header>
+
+<div class="mapbox">
+  <div id="map"></div>
+  <div class="mapbtns" id="mapbtns" hidden>
+    <button id="locate" type="button" aria-label="Locate me">📍 Locate</button>
+    <button id="tilt" type="button" aria-label="Switch between 2D and 3D">3D</button>
+    <button id="fit" type="button" aria-label="Fit all spots">Fit all</button>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<div class="card" id="card"></div>
+
+<h3>All spots</h3>
+<div class="list" id="list"></div>
+<p class="note">Pins checked against OpenStreetMap. Map © <a href="https://openfreemap.org">OpenFreeMap</a>, <a href="https://www.openmaptiles.org/">OpenMapTiles</a>, <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>; terrain from Mapzen/AWS Terrain Tiles. Tap 3D (or tilt with two fingers) to see Mt. Misen in 3D. Photos from Wikimedia Commons (see <a href="https://github.com/dhaneswaramandrasa/hiroshima-tour/blob/main/miyajima/img/CREDITS.md" target="_blank" rel="noopener">credits</a>). Facts: Itsukushima Shrine guide map, Miyajima Tourist Association, Wikipedia (EN/JA). Works offline except the map.</p>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
+<script>
+const SPOTS = [
+  {n:1, cap:"Left: the ferry terminal · Right: the island's deer", lat:34.302099, lon:132.322252, name:"Ferry Pier and Deer", q:"Miyajima Ferry Terminal",
+   where:"Miyajima Ferry Terminal, where the JR and Matsudai ferries land",
+   html:`<ul>
+<li>The ferry from Miyajimaguchi takes about <b>10 minutes</b>. Two companies run it: <b>JR West</b> and <b>Miyajima Matsudai</b>.</li>
+<li>The terminal (1976) was designed to echo the shrine: the building stands for the main hall, the piers for its corridors.</li>
+<li>Since <b>October 1, 2023</b> every visitor pays a <b>¥100 Miyajima Visitor Tax</b>, added to the ferry fare (or ¥500 for a whole year).</li>
+<li>The deer are wild and have long been seen as <b>messengers of the gods</b>. Islanders once kept no dogs, to protect them.</li>
+<li>Please don't feed them: since 1998 the island has worked to return the deer to the wild. They also eat paper, so keep maps and tickets in a bag.</li>
+<li>The whole island was treated as sacred. In the old days, when someone died they were taken across to the mainland for burial.</li>
+<li>Before the ferry: the <b>giant rice scoop</b> (7.7 m, 2.5 t) is on the mainland side, at etto in Miyajimaguchi. It was made in 1996 to celebrate the World Heritage listing.</li>
+</ul>`},
+  {n:2, lat:34.2988, lon:132.3209, name:"Omotesandō Shopping Street", q:"Miyajima Omotesando Shopping Street",
+   where:"Covered shopping street between the pier and the shrine",
+   html:`<ul>
+<li><b>Momiji manjū</b>: maple-leaf cakes, invented in <b>1906</b> by local sweets maker <b>Takatsu Tsunesuke</b>. They are named after the island's maple valley, Momijidani.</li>
+<li>A popular story says Prime Minister <b>Itō Hirobumi</b> joked that a tea-house girl's hands looked like maple leaves. It's a famous tale, not proven.</li>
+<li>The wooden rice scoop (<b>shamoji</b>) was invented here by <b>Seishin</b>, a priest of Kōmyō-in temple. He shaped it like the lute of the goddess Benzaiten.</li>
+<li>In Japanese a rice scoop is sometimes simply called a "Miyajima". You'll see scoops of every size in the shops.</li>
+<li>Hiroshima Prefecture is Japan's top oyster producer: look for the grilled-oyster stalls.</li>
+<li>For a quieter walk back, take <b>Machiya-dōri</b>, the old townhouse street one block inland.</li>
+</ul>`},
+  {n:3, lat:34.297304, lon:132.320269, name:"Senjōkaku (Hōkoku Shrine)", q:"Senjokaku Miyajima",
+   where:"On the small hill above the shrine, next to the Five-storied Pagoda",
+   html:`<ul>
+<li>Ordered in <b>1587</b> by <b>Toyotomi Hideyoshi</b>, the warlord who unified Japan, as a hall for reading sutras for soldiers killed in his wars. The monk Ankokuji Ekei directed the work.</li>
+<li>The floor is about <b>857 tatami mats</b>, so people call it Senjōkaku, the "thousand-mat hall".</li>
+<li>Work stopped when Hideyoshi turned to his invasion of Korea, and he died in <b>1598</b>. That's why it still has <b>no ceiling boards</b> and an unfinished front.</li>
+<li>In <b>1872</b> it became a shrine to Hideyoshi himself: Toyokuni Shrine, also read <b>Hōkoku</b>. He rose from peasant to ruler, so people pray here for success at work.</li>
+<li>Look up for the <b>giant rice scoops</b> offered on the walls.</li>
+<li>Entry about <b>¥100</b> (children ¥50). It's separate from the shrine ticket.</li>
+</ul>`},
+  {n:4, lat:34.297195, lon:132.320739, name:"Five-storied Pagoda", q:"Itsukushima Five-storied Pagoda",
+   where:"Next to Senjōkaku, on the hill above the shrine",
+   html:`<ul>
+<li>Built in <b>1407</b>, about <b>27 m</b> tall. Its roofs are cypress bark.</li>
+<li>The style is mainly Japanese, with Chinese Zen touches: look at the strongly upturned corners of each roof.</li>
+<li>In 1868 the government split Shinto from Buddhism. The pagoda's Buddha statues were moved down to <b>Daiganji Temple</b> (stop 7).</li>
+<li>Today it belongs to Itsukushima Shrine and is <b>closed inside</b>.</li>
+<li>It is part of the <b>World Heritage</b> site (1996), together with Senjōkaku.</li>
+</ul>`},
+  {n:5, cap:"Left: high tide · Right: low tide, when you can walk out", lat:34.2973, lon:132.318135, name:"Ōtorii (Great Torii Gate)", q:"Itsukushima Shrine Great Torii",
+   where:"In the sea, about 200 m out from the shrine",
+   html:`<ul>
+<li>About <b>16 m</b> tall. Each main pillar is about <b>10 m around</b>. It is one of the largest wooden torii in Japan.</li>
+<li><b>It is not buried in the seabed.</b> It stands on its own weight (about <b>60 t</b>) on a base of pine piles.</li>
+<li>The top beams are hollow boxes filled with about <b>7 t of fist-sized stones</b> to hold it steady in wind and waves.</li>
+<li>The two main pillars are whole <b>camphor trees</b>, found after a long search in Miyazaki and Kagawa prefectures.</li>
+<li>The current gate dates from <b>1875</b> and is said to be the <b>8th</b> since Taira no Kiyomori's time.</li>
+<li>The name plaque reads 嚴嶋神社 on the sea side and 伊都岐島神社 on the shrine side.</li>
+<li>At low tide you can walk out to it. Please don't push coins into the cracks: the shrine says it damages the wood.</li>
+</ul>`},
+  {n:6, cap:"The corridors, built over the water", lat:34.29585, lon:132.320008, name:"Itsukushima Shrine", q:"Itsukushima Shrine",
+   where:"Shrine entrance on the east side; one-way route, exit by the Noh stage",
+   html:`<ul>
+<li>Founded in <b>593</b>, according to the shrine, by local leader <b>Saeki Kuramoto</b>.</li>
+<li>Around <b>1168</b> the samurai leader <b>Taira no Kiyomori</b> rebuilt it at today's scale. Fires in 1207 and 1223 destroyed it, so today's halls date from the <b>1240s</b> onward.</li>
+<li>The <b>main shrine</b> honours three sea goddesses, the Munakata sisters. The <b>Marōdo Shrine</b> near the entrance honours five "guest" gods.</li>
+<li>The floorboards have <b>small gaps</b> so storm waves push up through the floor instead of lifting the building.</li>
+<li>The raised stage (<b>Takabutai</b>) is for <b>bugaku</b> court dance, which Kiyomori brought from Shitennōji temple in Osaka. It's still danced at festivals.</li>
+<li>The <b>Noh stage</b> was given in <b>1680</b> by Asano Tsunanaga, lord of Hiroshima. A typhoon knocked it down in 1991 and it was rebuilt.</li>
+<li>Small shrines on the route: <b>Daikoku</b> for matchmaking and <b>Tenjin</b> for study and exams.</li>
+<li>In 1868 the new government nearly had the shrine burned as "too Buddhist". The head priest appealed and saved it, but its paint had to be stripped.</li>
+<li>Listed as <b>World Heritage in December 1996</b>, at the same time as Hiroshima's A-bomb Dome.</li>
+</ul>`},
+  {n:7, lat:34.29547, lon:132.318232, name:"Daiganji Temple", q:"Daiganji Temple Miyajima",
+   where:"Just past the shrine exit",
+   html:`<ul>
+<li>A Shingon Buddhist temple, counted as one of Japan's <b>three great Benzaiten</b> temples. Benzaiten is the goddess of music, art and good fortune.</li>
+<li>Its Benzaiten statue came from Itsukushima Shrine in 1868. It is a <b>hidden statue</b>, shown only once a year on <b>June 17</b>.</li>
+<li>It also keeps Buddha statues moved from Senjōkaku, the Five-storied Pagoda and the Tahōtō.</li>
+<li>It holds the <b>oldest Buddha statue on Miyajima</b> (a seated Yakushi, the healing Buddha), an Important Cultural Property.</li>
+<li>In <b>1866</b> it hosted the peace talks between the shogun's envoy <b>Katsu Kaishū</b> and the Chōshū clan.</li>
+</ul>`},
+  {n:8, lat:34.294617, lon:132.318204, name:"Tahōtō Pagoda", q:"Tahoto Pagoda Miyajima",
+   where:"On the small hill south-west of the shrine, up the stone steps",
+   html:`<ul>
+<li>Built in <b>1523</b>, with a cypress-bark roof. It is an Important Cultural Property.</li>
+<li>A <b>tahōtō</b> is a two-storey pagoda: square below, round above.</li>
+<li>Its Buddha statue was also moved to Daiganji Temple in 1868.</li>
+<li><b>Battle of Miyajima, 1555:</b> warlord Sue Harukata's castle stood around this hill. <b>Mōri Motonari</b> landed with about <b>3,500</b> men and beat Sue's army of about <b>20,000</b>.</li>
+<li>That battle is called one of Japan's three famous surprise attacks. Mōri then ruled the area and took care of the shrine.</li>
+<li>It's a quiet spot looking over the shrine roofs, with cherry blossoms in spring.</li>
+</ul>`},
+  {n:9, lat:34.291743, lon:132.318562, name:"Daishō-in Temple", q:"Daisho-in Temple Miyajima",
+   where:"At the foot of Mt. Misen, about 500 m uphill from the shrine",
+   html:`<ul>
+<li>According to tradition, founded by the monk <b>Kūkai</b> (Kōbō Daishi) in <b>806</b>. It is the <b>oldest temple</b> on the island.</li>
+<li>Until 1868 it <b>managed Itsukushima Shrine</b>, back when Shinto and Buddhism were mixed.</li>
+<li><b>Emperor Meiji</b> stayed here in 1885 when he visited the shrine.</li>
+<li>The <b>Dalai Lama</b> came in 2006 for the temple's 1,200th anniversary.</li>
+<li>It is full of statues and small halls, including many Buddhist saints and the Seven Lucky Gods.</li>
+<li>The <b>Daishō-in trail</b> to the Misen summit (about 2.5 km of stone steps) starts here.</li>
+</ul>`},
+  {n:10, lat:34.293809, lon:132.325038, name:"Momijidani Park", q:"Momijidani Park Miyajima",
+   where:"Up the Momijidani River behind the shrine, on the way to the ropeway",
+   html:`<ul>
+<li>"Momijidani" means <b>maple valley</b>. More than <b>200 maple trees</b> grow here, at their best in November.</li>
+<li>This valley gave its name to the <b>momiji manjū</b> cake.</li>
+<li>In <b>September 1945</b>, a month after the atomic bomb, the <b>Makurazaki Typhoon</b> sent a landslide of rocks down this valley.</li>
+<li>The repairs (finished <b>1950</b>) were done as a "<b>garden dam</b>": no rock was damaged, not one tree was felled, and man-made parts were kept out of sight. Gardeners did the building.</li>
+<li>Those stone check dams are now a national <b>Important Cultural Property</b>.</li>
+<li>Iwasō, the ryokan here (since 1854), hosted guests like Itō Hirobumi and the writer Natsume Sōseki.</li>
+</ul>`},
+  {n:11, cap:"The Momijidani Line's small gondolas", lat:34.293222, lon:132.326747, name:"Miyajima Ropeway", q:"Miyajima Ropeway Momijidani Station",
+   where:"Momijidani Station, top of Momijidani Park (free shuttle bus from the park entrance)",
+   html:`<ul>
+<li>Opened <b>April 1, 1959</b>. It has two lines; you change cars at <b>Kayatani</b> station (you can't leave the station there).</li>
+<li><b>Momijidani Line</b>: small 8-person gondolas that keep circulating. About <b>10 minutes</b>.</li>
+<li><b>Shishiiwa Line</b>: one big cabin going back and forth. About <b>3.5 minutes</b>.</li>
+<li>New Shishiiwa cabins started in <b>March 2026</b>, named <b>"Sora" (sky) and "Umi" (sea)</b>. They hold 35 people and are painted vermilion like the shrine.</li>
+<li>From <b>Shishiiwa</b> station there's a viewpoint right away. The summit is about <b>30 minutes</b> more on foot.</li>
+</ul>`},
+  {n:12, cap:"Reikadō Hall before the May 2026 fire", lat:34.278311, lon:132.319677, name:"Kiezu-no-Hi (Eternal Flame)", q:"Reikado Hall Miyajima",
+   where:"Below the Misen summit, on the trail from the ropeway",
+   html:`<ul>
+<li>In <b>806</b> the monk <b>Kūkai</b> trained here for 100 days. The fire he used has been kept burning for about <b>1,200 years</b>.</li>
+<li>It is one of the "<b>Seven Wonders of Misen</b>".</li>
+<li>It was one of the flames used to light the <b>Flame of Peace</b> in Hiroshima's Peace Memorial Park.</li>
+<li>Its hall, <b>Reikadō</b>, burned down on <b>May 20, 2026</b>. The temple says the flame itself was saved.</li>
+<li>It has happened before: the hall burned in 2005, a monk carried the flame out on a candle, and the hall was rebuilt in 2006.</li>
+<li>⚠ Check with Daishō-in where the flame is being kept now before you bring guests.</li>
+</ul>`},
+  {n:13, lat:34.279592, lon:132.319611, name:"Mt. Misen Summit", q:"Mount Misen Observatory",
+   where:"Summit observation deck, about 30 minutes' walk from Shishiiwa station",
+   html:`<ul>
+<li>At <b>535 m</b>, the highest point on Miyajima.</li>
+<li>Kūkai founded it as a place of Buddhist training in <b>806</b>. The mountain itself has always been sacred.</li>
+<li><b>Itō Hirobumi</b> said the true value of the "Three Views of Japan" is the view from this summit. That remark led to the public trails being built.</li>
+<li>Miyajima has been one of the Three Views of Japan since a list made in <b>1643</b>.</li>
+<li>The north slope is a <b>primeval forest</b>, a national Natural Monument, inside the World Heritage area.</li>
+<li>On New Year's morning crowds climb here to watch the first sunrise of the year.</li>
+</ul>`}
+];
+
+const PHOTOS = {
+ "1": [
+  {
+   "src": "img/ferry-pier.jpg",
+   "credit": "Photo: Naokijp · CC BY-SA 4.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Miyajima_Ferry_Terminal_001.jpg",
+   "alt": "Ferries at Miyajima pier"
+  },
+  {
+   "src": "img/deer.jpg",
+   "credit": "Photo: Calvinkulit · CC BY-SA 4.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Deer_in_Miyajima.jpg",
+   "alt": "A deer resting on Miyajima"
+  }
+ ],
+ "2": [
+  {
+   "src": "img/omotesando.jpg",
+   "credit": "Photo: Malaiya · CC BY-SA 4.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Miyajima_island_town.jpg",
+   "alt": "Omotesando shopping street"
+  }
+ ],
+ "3": [
+  {
+   "src": "img/senjokaku.jpg",
+   "credit": "Photo: Hyppolyte de Saint-Rambert · CC BY 4.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Hokoku_jinja_(Miyajima_Hiroshima)_hdsr_Senjokaku_S5_04.jpg",
+   "alt": "Senjokaku hall"
+  }
+ ],
+ "4": [
+  {
+   "src": "img/five-storied-pagoda.jpg",
+   "credit": "Photo: Balon Greyjoy · CC0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:20181111_Itsukushima_Shrine_Pagoda-1.jpg",
+   "alt": "Five-storied Pagoda"
+  }
+ ],
+ "5": [
+  {
+   "src": "img/otorii-high-tide.jpg",
+   "credit": "Photo: Balon Greyjoy · CC0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:20181111_Itsukushima_Shrine_torii-1.jpg",
+   "alt": "Otorii at high tide"
+  },
+  {
+   "src": "img/otorii-low-tide.jpg",
+   "credit": "Photo: Bernard Gagnon · CC BY-SA 3.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Torii_and_Itsukushima_Shrine.jpg",
+   "alt": "Otorii at low tide"
+  }
+ ],
+ "6": [
+  {
+   "src": "img/itsukushima-shrine.jpg",
+   "credit": "Photo: Jakub Hałun · CC BY 4.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Itsukushima_Shinto_Shrine,_Miyjima,_20240816_1735_4090.jpg",
+   "alt": "Itsukushima Shrine corridors"
+  }
+ ],
+ "7": [
+  {
+   "src": "img/daiganji.jpg",
+   "credit": "Photo: Daderot · CC0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Daiganji_Temple_(Miyajima)_-_DSC02249.JPG",
+   "alt": "Daiganji Temple"
+  }
+ ],
+ "8": [
+  {
+   "src": "img/tahoto.jpg",
+   "credit": "Photo: Taisyo · CC BY 3.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Tahoto_Miyajima_2011.JPG",
+   "alt": "Tahoto Pagoda"
+  }
+ ],
+ "9": [
+  {
+   "src": "img/daishoin.jpg",
+   "credit": "Photo: Daderot · CC0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Daisho-in_(Miyajima)_-_DSC02130.JPG",
+   "alt": "Daisho-in Temple"
+  }
+ ],
+ "10": [
+  {
+   "src": "img/momijidani.jpg",
+   "credit": "Photo: Steven Perez · CC BY-SA 2.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:%E7%B4%85%E8%91%89%E8%B0%B7%E5%85%AC%E5%9C%92_%E5%AE%AE%E5%B3%B6.jpg",
+   "alt": "Momijidani Park in autumn"
+  }
+ ],
+ "11": [
+  {
+   "src": "img/ropeway.jpg",
+   "credit": "Photo: Naokijp · CC BY-SA 4.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Miyajima_Ropeway,_Momijidani_Line_001.jpg",
+   "alt": "Miyajima Ropeway gondolas"
+  }
+ ],
+ "12": [
+  {
+   "src": "img/reikado.jpg",
+   "credit": "Photo: Rickard Törnblad · CC BY-SA 4.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Reikado_Hall,_Mount_Misen,_Miyajima,_Hiroshima,_Japan_-_September_2015.jpg",
+   "alt": "Reikado Hall before the 2026 fire"
+  }
+ ],
+ "13": [
+  {
+   "src": "img/misen-summit.jpg",
+   "credit": "Photo: Bermard Gagnon · CC BY-SA 3.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:Mount_Misen-01.jpg",
+   "alt": "View from Mt. Misen"
+  }
+ ]
+};
+
+const gmaps = (lat,lon) => `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+const $ = id => document.getElementById(id);
+const list = $("list"), card = $("card");
+const HAS_MAP = typeof maplibregl !== "undefined";
+let cur = 0, me = null, map = null, meMarker = null, meAcc = null, watchId = null, follow = false;
+
+function toast(msg, ms=3500){
+  const t=$("toast"); t.textContent=msg; t.style.display="block";
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.display="none", ms);
+}
+function dist(a,b){ // metres, equirectangular is plenty at park scale
+  const R=6371000, toR=Math.PI/180, x=(b.lon-a.lon)*toR*Math.cos((a.lat+b.lat)/2*toR), y=(b.lat-a.lat)*toR;
+  return Math.round(Math.hypot(x,y)*R);
+}
+const fmt = m => m<1000 ? `${m} m` : `${(m/1000).toFixed(1)} km`;
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- map ---------- */
+const lngLat = s => [s.lon, s.lat];
+let parkBounds = null, is3D = false;
+
+function englishLabels(){
+  // OpenFreeMap styles show "romaji + kanji"; prefer English, then romaji, then local name.
+  const en = ["coalesce",["get","name:en"],["get","name_en"],["get","name:latin"],["get","name"]];
+  for (const l of map.getStyle().layers){
+    if (l.type==="symbol" && map.getLayoutProperty(l.id,"text-field")) map.setLayoutProperty(l.id,"text-field",en);
+  }
+}
+function circleGeo(lat, lon, r){ // accuracy circle as a polygon (metres)
+  const pts=[], k=r/111320;
+  for(let a=0;a<=360;a+=10){ const t=a*Math.PI/180; pts.push([lon+k*Math.cos(t)/Math.cos(lat*Math.PI/180), lat+k*Math.sin(t)]); }
+  return {type:"Feature",geometry:{type:"Polygon",coordinates:[pts]}};
+}
+function setFollow(on){ follow=on; $("locate") && $("locate").classList.toggle("on",on); }
+
+if (HAS_MAP){
+  map = new maplibregl.Map({
+    container:"map",
+    style:"https://tiles.openfreemap.org/styles/liberty", // light map in both themes: readable in sunlight
+    center:[132.3215,34.2905], zoom:14.5, maxPitch:70,
+    attributionControl:{compact:true}, dragRotate:true, pitchWithRotate:true
+  });
+  map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"top-left");
+
+  parkBounds = SPOTS.reduce((b,s)=>b.extend(lngLat(s)), new maplibregl.LngLatBounds(lngLat(SPOTS[0]),lngLat(SPOTS[0])));
+  const fit = (anim=true) => {
+    const cam = map.cameraForBounds(parkBounds,{padding:is3D?{top:60,bottom:10,left:40,right:40}:{top:30,bottom:55,left:30,right:30}, bearing:is3D?-20:0});
+    map.easeTo({...cam, pitch:is3D?55:0, bearing:is3D?-20:0, duration:anim?700:0});
+  };
+  fit(false);
+  window.addEventListener("load",()=>{ map.resize(); fit(false); });
+
+  map.on("load",()=>{
+    englishLabels();
+    // our own 3D buildings layer (hidden in 2D)
+    const before = map.getStyle().layers.find(l=>l.type==="symbol")?.id;
+    if (map.getLayer("building-3d")) map.setLayoutProperty("building-3d","visibility","none");
+    map.addLayer({id:"tour-3d", type:"fill-extrusion", source:"openmaptiles", "source-layer":"building", minzoom:14,
+      layout:{visibility:"none"},
+      paint:{"fill-extrusion-color": "#d9d3c7",
+             "fill-extrusion-height":["coalesce",["get","render_height"],8],
+             "fill-extrusion-base":["coalesce",["get","render_min_height"],0],
+             "fill-extrusion-opacity":.85}}, before);
+    // terrain (Mt. Misen): free AWS Terrain Tiles, used for hill shading and for 3D mode
+    map.addSource("dem",{type:"raster-dem",tiles:["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],encoding:"terrarium",tileSize:256,maxzoom:15,attribution:'Terrain: <a href="https://registry.opendata.aws/terrain-tiles/">Mapzen/AWS Terrain Tiles</a>'});
+    map.addLayer({id:"hills",type:"hillshade",source:"dem",paint:{"hillshade-exaggeration":.35,"hillshade-shadow-color":"#6b6457"}}, before);
+    if (is3D) map.setTerrain({source:"dem",exaggeration:1.3});
+    map.addSource("me-acc",{type:"geojson",data:{type:"FeatureCollection",features:[]}});
+    map.addLayer({id:"me-acc",type:"fill",source:"me-acc",paint:{"fill-color":"#1a73e8","fill-opacity":.13}});
+  });
+
+  SPOTS.forEach((s,i)=>{
+    const el=document.createElement("div");
+    el.className="pinicon"; el.setAttribute("role","button"); el.setAttribute("aria-label",s.name); el.tabIndex=0;
+    el.innerHTML=`<div class="hit"><div class="dot">${s.n}</div></div>`;
+    el.addEventListener("click",ev=>{ ev.stopPropagation(); show(nearestPin(ev,i),false); });
+    el.addEventListener("keydown",ev=>{ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); show(i,false); } });
+    s.el=el;
+    s.m=new maplibregl.Marker({element:el,anchor:"center"}).setLngLat(lngLat(s)).addTo(map);
+  });
+
+  // Pins close together have overlapping 44px tap areas: pick the one whose centre is nearest the finger.
+  function nearestPin(ev, fallback){
+    const r=map.getContainer().getBoundingClientRect(), x=ev.clientX-r.left, y=ev.clientY-r.top;
+    let best=fallback, bd=Infinity;
+    SPOTS.forEach((s,j)=>{ const p=map.project(lngLat(s)), d=Math.hypot(p.x-x,p.y-y); if(d<bd){bd=d;best=j;} });
+    return best;
+  }
+
+  function set3D(on){
+    is3D=on;
+    $("tilt").textContent = on ? "2D" : "3D";
+    $("tilt").classList.toggle("on",on);
+    if (map.getLayer("tour-3d")) map.setLayoutProperty("tour-3d","visibility",on?"visible":"none");
+    if (map.getSource("dem")) map.setTerrain(on?{source:"dem",exaggeration:1.3}:null);
+    const cam = map.cameraForBounds(parkBounds,{padding:on?{top:60,bottom:10,left:40,right:40}:{top:30,bottom:55,left:30,right:30}, bearing:on?-20:0});
+    map.easeTo({...cam, pitch:on?55:0, bearing:on?-20:0, duration:900});
+  }
+
+  $("mapbtns").hidden = false;
+  $("tilt").onclick = ()=>set3D(!is3D);
+  $("fit").onclick = ()=>{ setFollow(false); fit(); };
+  $("locate").onclick = ()=>{
+    setFollow(true);
+    if (me) map.easeTo({center:[me.lon,me.lat], zoom:Math.max(map.getZoom(),17)});
+    else toast("Finding your location…");
+    startWatch(true);
+  };
+  map.on("dragstart",()=>setFollow(false));
+  map.on("pitchend",()=>{ // keep the button honest if the user tilts with two fingers
+    const on = map.getPitch()>10;
+    if (on!==is3D){ is3D=on; $("tilt").textContent=on?"2D":"3D"; $("tilt").classList.toggle("on",on);
+      if (map.getLayer("tour-3d")) map.setLayoutProperty("tour-3d","visibility",on?"visible":"none");
+      if (map.getSource("dem")) map.setTerrain(on?{source:"dem",exaggeration:1.3}:null); }
+  });
+} else {
+  $("map").outerHTML = '<div class="nomap">Map unavailable offline. The spot list and fact cards below still work.</div>';
+}
+
+/* ---------- GPS ---------- */
+function startWatch(userAsked){
+  if (watchId!==null) return;
+  if (!("geolocation" in navigator)){ if(userAsked) toast("This browser has no GPS access."); return; }
+  watchId = navigator.geolocation.watchPosition(pos=>{
+    const first = !me;
+    if (first) $("toast").style.display="none";
+    me = {lat:pos.coords.latitude, lon:pos.coords.longitude, acc:pos.coords.accuracy};
+    if (map){
+      const ll=[me.lon,me.lat];
+      if(!meMarker){
+        const d=document.createElement("div"); d.className="medot";
+        meMarker = new maplibregl.Marker({element:d,anchor:"center"}).setLngLat(ll).addTo(map);
+      } else meMarker.setLngLat(ll);
+      const src = map.getSource("me-acc"); if (src) src.setData(circleGeo(me.lat,me.lon,me.acc));
+      if (follow) map.easeTo({center:ll, zoom: first ? Math.max(map.getZoom(),17) : map.getZoom()});
+    }
+    updateDistances();
+  }, err=>{
+    watchId = null; if (map) setFollow(false);
+    if (userAsked || err.code!==1) toast(err.code===1 ? "Location permission denied. Allow it in your browser settings to see the blue dot." : "Couldn't get your location yet. Try again in the open.");
+  }, {enableHighAccuracy:true, maximumAge:5000, timeout:20000});
+}
+// start silently if permission was granted before
+if (navigator.permissions && navigator.permissions.query){
+  navigator.permissions.query({name:"geolocation"}).then(r=>{ if(r.state==="granted") startWatch(false); }).catch(()=>{});
+}
+
+function updateDistances(){
+  if(!me) return;
+  SPOTS.forEach(s=>{ s.dEl.textContent = fmt(dist(me,s)); });
+  const el=$("dist"); if(el) el.textContent = `≈ ${fmt(dist(me,SPOTS[cur]))} from you`;
+}
+
+/* ---------- list + card ---------- */
+SPOTS.forEach((s,i)=>{
+  const b = document.createElement("button");
+  b.type="button";
+  b.innerHTML = `<span class="num">${s.n}</span><span>${esc(s.name)}</span><span class="d"></span>`;
+  b.addEventListener("click",()=>show(i,true));
+  list.appendChild(b);
+  s.b = b; s.dEl = b.querySelector(".d");
+});
+
+function photoHTML(s){
+  const ps = PHOTOS[s.n] || [];
+  const figs = ps.map(p=>`<figure><img src="${p.src}" alt="${esc(p.alt||s.name)}" loading="lazy" decoding="async">
+    <figcaption class="credit">${p.page?`<a href="${p.page}" target="_blank" rel="noopener">${esc(p.credit)}</a>`:esc(p.credit)}</figcaption></figure>`).join("");
+  return `<div class="photos">${figs}</div>`;
+}
+
+function show(i, scroll){
+  cur = i;
+  const s = SPOTS[i];
+  SPOTS.forEach((t,j)=>{
+    t.b.classList.toggle("active",j===i);
+    if (t.el) t.el.classList.toggle("active", j===i);
+  });
+  card.innerHTML = `${photoHTML(s)}${s.cap?`<div class="cap">${s.cap}</div>`:''}
+  <h2>${s.n}. ${esc(s.name)}</h2><div class="where">📍 ${esc(s.where)}</div>${me?`<div class="dist" id="dist"></div>`:'<div id="dist" class="dist" hidden></div>'}${s.html}
+  <div class="row">
+    <a class="btn primary" href="${gmaps(s.lat,s.lon)}" target="_blank" rel="noopener">Open in Google Maps</a>
+    <button class="btn half" type="button" id="prev">‹ Prev</button>
+    <button class="btn half" type="button" id="next">Next ›</button>
+  </div>`;
+  $("prev").onclick = ()=>go(-1);
+  $("next").onclick = ()=>go(1);
+  if (me) { $("dist").hidden=false; updateDistances(); }
+  if (map && scroll) map.easeTo({center:[s.lon,s.lat]});
+  if (scroll) card.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function go(step){
+  const i=(cur+step+SPOTS.length)%SPOTS.length;
+  if (map) setFollow(false);
+  show(i,true);
+}
+show(0,false);
+
+/* ---------- offline ---------- */
+if ("serviceWorker" in navigator && location.protocol!=="file:"){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 // Offline backup: caches the page, photos and Leaflet. Map tiles stay online-only.
-const CACHE = "peace-park-v5";
+const CACHE = "peace-park-v6";
 const LOCAL = [
   "./", "./index.html", "./img/CREDITS.md",
   "./img/a-bomb-dome.jpg", "./img/industrial-promotion-hall-1915.jpg", "./img/hypocenter-marker.jpg", "./img/shima-hospital-1943.jpg", "./img/peace-clock-tower.jpg", "./img/memorial-mound.jpg", "./img/korean-victims-monument.jpg", "./img/childrens-peace-monument.jpg", "./img/peace-fountain.jpg", "./img/peace-bell.jpg", "./img/flame-of-peace.jpg", "./img/pond-of-peace.jpg", "./img/cenotaph.jpg", "./img/peace-memorial-museum.jpg", "./img/peace-watch.jpg", "./img/mother-and-child.jpg", "./img/fountain-of-prayer.jpg", "./img/gates-of-peace.jpg"
@@ -31,6 +31,7 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+  if (url.origin === location.origin && url.pathname.startsWith(new URL("./miyajima/", self.registration.scope).pathname)) return; // other tour: its own worker
   if (url.hostname.endsWith("tile.openstreetmap.org")) return; // tiles: network only
 
   // Page: network first so updates show up, cache when offline
