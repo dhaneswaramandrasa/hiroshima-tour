@@ -69,6 +69,16 @@
   .list .d{margin-left:auto;color:var(--muted);font-size:12px}
   .note{color:var(--muted);font-size:12px;margin:4px 16px 24px}
   .note a{color:inherit}
+  .viz{margin:6px 0 12px}
+  .viz svg{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}
+  .v-water{fill:#cfe4f1} .v-land{fill:#efe3c6} .v-bld{fill:#8b6a4c} .v-deck{fill:#e9e4da;stroke:#b8ab95;stroke-width:1}
+  .v-stage{fill:none;stroke:var(--pin);stroke-width:2} .v-bridge{fill:none;stroke:#c8452f;stroke-width:5;stroke-linecap:round}
+  .v-route{fill:none;stroke:#e3a21a;stroke-width:5;stroke-linecap:round;stroke-linejoin:round} .v-arrow{fill:#e3a21a}
+  .v-dash{stroke:#5f6670;stroke-width:1.5;stroke-dasharray:3 3} .v-torii rect{fill:#c8452f}
+  .v-small{font:600 10px -apple-system,BlinkMacSystemFont,sans-serif;fill:#4a4f57}
+  .v-num circle{fill:var(--pin);stroke:#fff;stroke-width:2} .v-num text{font:700 10px -apple-system,BlinkMacSystemFont,sans-serif;fill:#fff;text-anchor:middle}
+  .v-cap{color:var(--muted);font-size:12px;margin:4px 2px 6px}
+  .v-legend{margin:0;padding-left:24px;font-size:14px} .v-legend li{margin:3px 0}
   .intro{margin:8px 12px 0;background:var(--card);border:1px solid var(--line);border-radius:14px}
   .intro summary{min-height:48px;padding:12px 16px;font-weight:700;font-size:16px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
   .intro summary::-webkit-details-marker{display:none}
@@ -204,6 +214,68 @@ const SPOTS = [
 <li>At low tide you can walk out to it. Please don't push coins into the cracks: the shrine says it damages the wood.</li>
 </ul>`},
   {n:7, cap:"The corridors, built over the water", lat:34.29585, lon:132.320008, name:"Itsukushima Shrine", q:"Itsukushima Shrine",
+   viz:`<div class="viz">
+<svg viewBox="0 0 360 300" role="img" aria-label="Route through Itsukushima Shrine, from entrance to exit">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="2.6" markerHeight="2.6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="v-arrow"/></marker></defs>
+<rect x="0" y="0" width="360" height="300" class="v-water"/>
+<path d="M0,0 H360 V40 C300,46 240,40 200,34 C150,28 90,40 40,46 V300 H0 Z" class="v-land"/>
+<path d="M335,40 C340,120 330,220 360,300 V40 Z" class="v-land"/>
+<text x="8" y="16" class="v-small">↖ Senjōkaku &amp; Pagoda</text>
+<text x="352" y="16" class="v-small" text-anchor="end">Treasure Hall ↗</text>
+<!-- buildings -->
+<rect x="48" y="160" width="44" height="40" rx="3" class="v-bld"/>
+<rect x="150" y="54" width="60" height="50" rx="3" class="v-bld"/>
+<rect x="164" y="104" width="32" height="112" class="v-deck"/>
+<rect x="172" y="160" width="16" height="16" class="v-stage"/>
+<rect x="138" y="188" width="24" height="12" rx="2" class="v-bld"/>
+<rect x="198" y="188" width="24" height="12" rx="2" class="v-bld"/>
+<rect x="176" y="216" width="8" height="28" class="v-deck"/>
+<rect x="222" y="46" width="20" height="16" rx="2" class="v-bld"/>
+<rect x="262" y="46" width="20" height="16" rx="2" class="v-bld"/>
+<rect x="208" y="112" width="24" height="16" rx="2" class="v-bld"/>
+<rect x="255" y="112" width="30" height="30" rx="2" class="v-bld"/>
+<path d="M300,64 Q318,40 336,64" class="v-bridge"/>
+<!-- route -->
+<path d="M70,272 V210" class="v-route" marker-end="url(#ar)"/>
+<path d="M70,152 V84 H140" class="v-route" marker-end="url(#ar)"/>
+<path d="M216,84 H296" class="v-route" marker-end="url(#ar)"/>
+<path d="M304,84 V150 H340" class="v-route" marker-end="url(#ar)"/>
+<!-- torii + distance -->
+<line x1="180" y1="250" x2="180" y2="268" class="v-dash"/>
+<g class="v-torii" transform="translate(180,284)"><rect x="-16" y="-10" width="32" height="3.5" rx="1"/><rect x="-13" y="-5" width="26" height="2.5"/><rect x="-10" y="-8" width="3" height="16"/><rect x="7" y="-8" width="3" height="16"/></g>
+<text x="202" y="287" class="v-small">Ōtorii ≈ 200 m</text>
+<!-- numbers -->
+<g class="v-num">
+<circle cx="70" cy="272" r="10"/><text x="70" y="276">1</text>
+<circle cx="70" cy="180" r="10"/><text x="70" y="184">2</text>
+<circle cx="180" cy="79" r="10"/><text x="180" y="83">3</text>
+<circle cx="180" cy="148" r="10"/><text x="180" y="152">4</text>
+<circle cx="180" cy="240" r="10"/><text x="180" y="244">5</text>
+<circle cx="220" cy="136" r="10"/><text x="220" y="140">6</text>
+<circle cx="256" cy="98" r="10"/><text x="256" y="102">7</text>
+<circle cx="232" cy="30" r="10"/><text x="232" y="34">8</text>
+<circle cx="272" cy="30" r="10"/><text x="272" y="34">9</text>
+<circle cx="318" cy="30" r="10"/><text x="318" y="34">10</text>
+<circle cx="270" cy="158" r="10"/><text x="270" y="162">11</text>
+<circle cx="340" cy="170" r="10"/><text x="340" y="174">12</text>
+</g>
+</svg>
+<div class="v-cap">Shrine route (one way, follow the arrows). Sea at the bottom, island behind.</div>
+<ol class="v-legend">
+<li><b>Entrance</b>: show your ticket and start along the corridor.</li>
+<li><b>Marōdo Shrine</b>: five "guest" gods.</li>
+<li><b>Main Shrine</b>: the three sea goddesses. The heart of the shrine.</li>
+<li><b>Takabutai</b>: raised stage for bugaku dance; musicians play in the two side rooms, Ugakubō and Sagakubō.</li>
+<li><b>Hitasaki</b>: tip of the pier. The Ōtorii is straight ahead, ~200 m. Best photo spot.</li>
+<li><b>Amulet office</b>: charms, prayers and the <i>shuin</i> stamp.</li>
+<li><b>Ema &amp; omikuji</b>: wish tablets and paper fortunes (tie a bad one here).</li>
+<li><b>Daikoku Shrine</b>: god of matchmaking.</li>
+<li><b>Tenjin Shrine</b>: Sugawara no Michizane, god of learning.</li>
+<li><b>Soribashi</b>: the steep arched bridge (look, don't cross).</li>
+<li><b>Noh Stage</b>: over the water, given in 1680.</li>
+<li><b>Exit</b>: to Daiganji (stop 8), the Treasure Hall and Kiyomori Shrine.</li>
+</ol>
+</div>`,
    where:"Shrine entrance on the east side; one-way route, exit by the Noh stage",
    html:`<ul>
 <li>Founded in <b>593</b>, according to the shrine, by local leader <b>Saeki Kuramoto</b>.</li>
@@ -598,7 +670,7 @@ function show(i, scroll){
     if (t.el) t.el.classList.toggle("active", j===i);
   });
   card.innerHTML = `${photoHTML(s)}${s.cap?`<div class="cap">${s.cap}</div>`:''}
-  <h2>${s.n}. ${esc(s.name)}</h2><div class="where">📍 ${esc(s.where)}</div>${me?`<div class="dist" id="dist"></div>`:'<div id="dist" class="dist" hidden></div>'}${s.html}
+  <h2>${s.n}. ${esc(s.name)}</h2><div class="where">📍 ${esc(s.where)}</div>${me?`<div class="dist" id="dist"></div>`:'<div id="dist" class="dist" hidden></div>'}${s.viz||""}${s.html}
   <div class="row">
     <a class="btn primary" href="${gmaps(s.lat,s.lon)}" target="_blank" rel="noopener">Open in Google Maps</a>
     <button class="btn half" type="button" id="prev">‹ Prev</button>
