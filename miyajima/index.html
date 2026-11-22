@@ -69,6 +69,9 @@
   .list .d{margin-left:auto;color:var(--muted);font-size:12px}
   .note{color:var(--muted);font-size:12px;margin:4px 16px 24px}
   .note a{color:inherit}
+  .topnav{display:flex;gap:6px;padding:10px 12px 0;overflow-x:auto}
+  .topnav a{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;font-size:14px;font-weight:600}
+  .topnav a.on{background:var(--accent);border-color:var(--accent);color:#fff}
   .viz{margin:6px 0 12px}
   .viz svg{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}
   .v-water{fill:#cfe4f1} .v-land{fill:#efe3c6} .v-bld{fill:#8b6a4c} .v-deck{fill:#e9e4da;stroke:#b8ab95;stroke-width:1}
@@ -92,9 +95,10 @@
 </head>
 <body>
 <div class="wrap">
+<nav class="topnav" aria-label="Tours"><a href="../">🏠 Tours</a><a href="../peace-park/">Peace Park</a><a href="../miyajima/" class="on" aria-current="page">Miyajima</a></nav>
 <header>
   <h1>Miyajima Tour Map</h1>
-  <div class="sub">Tap a number for its key facts. Numbers follow the walking order: pier → Kiyomori → shrine → temples → ropeway → Misen. <a href="https://www.miyajima.or.jp/english/sio/sio.php" target="_blank" rel="noopener">Tide times</a> · <a href="../">Peace Park tour</a></div>
+  <div class="sub">Tap a number for its key facts. Numbers follow the walking order: pier → Kiyomori → shrine → temples → ropeway → Misen. <a href="https://www.miyajima.or.jp/english/sio/sio.php" target="_blank" rel="noopener">Tide times</a></div>
 </header>
 
 <details class="intro" open>
