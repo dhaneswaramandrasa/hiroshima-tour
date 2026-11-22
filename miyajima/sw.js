@@ -1,5 +1,5 @@
 // Miyajima tour offline backup: caches the page, photos and MapLibre. Map tiles stay online-only.
-const CACHE = "miyajima-v2";
+const CACHE = "miyajima-v3";
 const LOCAL = [
   "./", "./index.html", "./img/CREDITS.md",
   "./img/daiganji.jpg", "./img/kiyomori-statue.jpg", "./img/world-heritage-monument.jpg", "./img/daishoin.jpg", "./img/deer.jpg", "./img/ferry-pier.jpg", "./img/five-storied-pagoda.jpg", "./img/itsukushima-shrine.jpg", "./img/misen-summit.jpg", "./img/momijidani.jpg", "./img/omotesando.jpg", "./img/otorii-high-tide.jpg", "./img/otorii-low-tide.jpg", "./img/reikado.jpg", "./img/ropeway.jpg", "./img/senjokaku.jpg", "./img/tahoto.jpg"

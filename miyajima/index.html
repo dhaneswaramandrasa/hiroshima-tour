@@ -69,6 +69,14 @@
   .list .d{margin-left:auto;color:var(--muted);font-size:12px}
   .note{color:var(--muted);font-size:12px;margin:4px 16px 24px}
   .note a{color:inherit}
+  .intro{margin:8px 12px 0;background:var(--card);border:1px solid var(--line);border-radius:14px}
+  .intro summary{min-height:48px;padding:12px 16px;font-weight:700;font-size:16px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+  .intro summary::-webkit-details-marker{display:none}
+  .intro summary::after{content:"＋";margin-left:auto;color:var(--muted)}
+  .intro[open] summary::after{content:"－"}
+  .intro .body{padding:0 16px 12px}
+  .intro ul{margin:0;padding-left:20px} .intro li{margin:5px 0}
+  .intro h4{margin:12px 0 4px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
   .sub a{color:var(--accent);font-weight:600}
 </style>
 </head>
@@ -78,6 +86,38 @@
   <h1>Miyajima Tour Map</h1>
   <div class="sub">Tap a number for its key facts. Numbers follow the walking order: pier → Kiyomori → shrine → temples → ropeway → Misen. <a href="https://www.miyajima.or.jp/english/sio/sio.php" target="_blank" rel="noopener">Tide times</a> · <a href="../">Peace Park tour</a></div>
 </header>
+
+<details class="intro" open>
+  <summary>👋 Welcome to Miyajima</summary>
+  <div class="body"><ul>
+<li>The island's official name is <b>Itsukushima</b>. "Miyajima" is a nickname meaning <b>"shrine island"</b>.</li>
+<li>Since ancient times the <b>whole island has been worshipped as a god</b>. That's why so many old rules here were about keeping it pure.</li>
+<li>It is one of the <b>Three Views of Japan</b>, with Matsushima and Amanohashidate, a list made in <b>1643</b>.</li>
+<li>Itsukushima Shrine became a <b>World Heritage Site in December 1996</b>, together with Hiroshima's A-bomb Dome, so the city has two World Heritage sites.</li>
+<li>About <b>30 km²</b> and mostly mountain, topped by <b>Mt. Misen (535 m)</b>. About <b>2,000 people</b> live here; part of Hatsukaichi City since 2005.</li>
+</ul></div>
+</details>
+<details class="intro">
+  <summary>💡 Island trivia</summary>
+  <div class="body">
+<h4>A sacred island</h4><ul>
+<li><b>There are no graves on Miyajima.</b> Not one, even today. When someone died, the body was taken across to Akasaki on the mainland, and the family couldn't come back until mourning was over. This custom lasted until around World War II.</li>
+<li>Old records say that after a birth, <b>mother and baby were sent to the mainland</b> for about 100 days.</li>
+<li><b>Farming was banned</b>: putting iron tools into the sacred soil was taboo. Weaving was banned too. Food came by boat from peddlers on the mainland, a sight that lasted until after World War II.</li>
+<li>Trees on the island may not be cut for lumber.</li>
+</ul>
+<h4>Deer</h4><ul>
+<li>Islanders once kept <b>no dogs</b>, to protect the sacred deer. Houses had "deer doors" to keep them out and "deer buckets" for leftover food.</li>
+<li>After World War II the deer nearly vanished: occupation soldiers hunted them for sport.</li>
+<li>Some say the deer came from Nara. They didn't: DNA shows they are Miyajima's own line, and there is no record of any gift from Nara.</li>
+</ul>
+<h4>Small surprises</h4><ul>
+<li>There are <b>no traffic lights</b> on the island.</li>
+<li>The city's name, <b>Hatsukaichi</b>, means "20th-day market". It grew from a market held on the 20th of each month, the last day of the shrine's festivals, back in the Kamakura period (1185–1333).</li>
+<li>In Japanese, a rice scoop is sometimes simply called a "Miyajima".</li>
+<li>A regular ferry started in <b>1900</b>. Before that people crossed by small boats, and visitor numbers jumped once the ferry began.</li>
+</ul></div>
+</details>
 
 <div class="mapbox">
   <div id="map"></div>
