@@ -76,7 +76,7 @@
 <div class="wrap">
 <header>
   <h1>Miyajima Tour Map</h1>
-  <div class="sub">Tap a number for its key facts. Numbers follow the walking order: pier → shrine → temples → ropeway → Misen. <a href="https://www.miyajima.or.jp/english/sio/sio.php" target="_blank" rel="noopener">Tide times</a> · <a href="../">Peace Park tour</a></div>
+  <div class="sub">Tap a number for its key facts. Numbers follow the walking order: pier → Kiyomori → shrine → temples → ropeway → Misen. <a href="https://www.miyajima.or.jp/english/sio/sio.php" target="_blank" rel="noopener">Tide times</a> · <a href="../">Peace Park tour</a></div>
 </header>
 
 <div class="mapbox">
@@ -93,7 +93,7 @@
 
 <h3>All spots</h3>
 <div class="list" id="list"></div>
-<p class="note">Pins checked against OpenStreetMap. Map © <a href="https://openfreemap.org">OpenFreeMap</a>, <a href="https://www.openmaptiles.org/">OpenMapTiles</a>, <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>; terrain from Mapzen/AWS Terrain Tiles. Tap 3D (or tilt with two fingers) to see Mt. Misen in 3D. Photos from Wikimedia Commons (see <a href="https://github.com/dhaneswaramandrasa/hiroshima-tour/blob/main/miyajima/img/CREDITS.md" target="_blank" rel="noopener">credits</a>). Facts: Itsukushima Shrine guide map, Miyajima Tourist Association, Wikipedia (EN/JA). Works offline except the map.</p>
+<p class="note">Pins checked against OpenStreetMap. Map © <a href="https://openfreemap.org">OpenFreeMap</a>, <a href="https://www.openmaptiles.org/">OpenMapTiles</a>, <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>; terrain from Mapzen/AWS Terrain Tiles. Tap 3D (or tilt with two fingers) to see Mt. Misen in 3D. Photos from Wikimedia Commons, plus one of the guide's own (see <a href="https://github.com/dhaneswaramandrasa/hiroshima-tour/blob/main/miyajima/img/CREDITS.md" target="_blank" rel="noopener">credits</a>). Facts: Itsukushima Shrine guide map, on-site signs, Miyajima Tourist Association, Wikipedia (EN/JA). Works offline except the map.</p>
 </div>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" crossorigin=""></script>
@@ -110,7 +110,20 @@ const SPOTS = [
 <li>The whole island was treated as sacred. In the old days, when someone died they were taken across to the mainland for burial.</li>
 <li>Before the ferry: the <b>giant rice scoop</b> (7.7 m, 2.5 t) is on the mainland side, at etto in Miyajimaguchi. It was made in 1996 to celebrate the World Heritage listing.</li>
 </ul>`},
-  {n:2, lat:34.2988, lon:132.3209, name:"Omotesandō Shopping Street", q:"Miyajima Omotesando Shopping Street",
+  {n:2, cap:"Left: Kiyomori's statue · Right: the World Heritage monument", lat:34.301608, lon:132.321609, name:"Taira no Kiyomori Statue", q:"Taira no Kiyomori statue Miyajima",
+   where:"Seafront just south of the ferry terminal, next to the World Heritage monument",
+   html:`<ul>
+<li><b>Start the story here.</b> Taira no Kiyomori (1118–1181) was the samurai leader who built Itsukushima Shrine as you see it today.</li>
+<li>After winning two civil wars (Hōgen and Heiji), he became Japan's top samurai. In <b>1167</b> he was made <b>Chancellor of the Realm</b>, the highest post at court.</li>
+<li>In 1179 he put the retired Emperor Go-Shirakawa under house arrest. The next year he made his own grandson, <b>Emperor Antoku</b>, the new emperor and ruled through the Taira (Heike) clan.</li>
+<li>His power made many enemies, and <b>Minamoto no Yoritomo</b> rose against him. Kiyomori died of fever in 1181, aged 64. Four years later his clan was wiped out.</li>
+<li>He became governor of <b>Aki Province</b> (today's western Hiroshima) in <b>1146</b> and came to this shrine more than ten times.</li>
+<li>In <b>1168</b> he rebuilt the shrine in its present form, in the <b>Shinden-zukuri</b> style of nobles' mansions, so the halls seem to float on the sea.</li>
+<li>In 1164 his clan gave the shrine the <b>Heike Nōkyō</b>, hand-copied Buddhist sutras that are now a <b>National Treasure</b>.</li>
+<li>He brought <b>bugaku</b> court dance and boat parties with court music. Those boat parties are the origin of the <b>Kangensai</b> festival, held every year on June 17 of the old lunar calendar.</li>
+<li><b>World Heritage monument</b> (next to the statue): listed on <b>December 7, 1996</b>. The listing covers the shrine buildings, the Mt. Misen forest behind them and the sea in front as far as the Ōtorii.</li>
+</ul>`},
+  {n:3, lat:34.2988, lon:132.3209, name:"Omotesandō Shopping Street", q:"Miyajima Omotesando Shopping Street",
    where:"Covered shopping street between the pier and the shrine",
    html:`<ul>
 <li><b>Momiji manjū</b>: maple-leaf cakes, invented in <b>1906</b> by local sweets maker <b>Takatsu Tsunesuke</b>. They are named after the island's maple valley, Momijidani.</li>
@@ -120,7 +133,7 @@ const SPOTS = [
 <li>Hiroshima Prefecture is Japan's top oyster producer: look for the grilled-oyster stalls.</li>
 <li>For a quieter walk back, take <b>Machiya-dōri</b>, the old townhouse street one block inland.</li>
 </ul>`},
-  {n:3, lat:34.297304, lon:132.320269, name:"Senjōkaku (Hōkoku Shrine)", q:"Senjokaku Miyajima",
+  {n:4, lat:34.297304, lon:132.320269, name:"Senjōkaku (Hōkoku Shrine)", q:"Senjokaku Miyajima",
    where:"On the small hill above the shrine, next to the Five-storied Pagoda",
    html:`<ul>
 <li>Ordered in <b>1587</b> by <b>Toyotomi Hideyoshi</b>, the warlord who unified Japan, as a hall for reading sutras for soldiers killed in his wars. The monk Ankokuji Ekei directed the work.</li>
@@ -130,16 +143,16 @@ const SPOTS = [
 <li>Look up for the <b>giant rice scoops</b> offered on the walls.</li>
 <li>Entry about <b>¥100</b> (children ¥50). It's separate from the shrine ticket.</li>
 </ul>`},
-  {n:4, lat:34.297195, lon:132.320739, name:"Five-storied Pagoda", q:"Itsukushima Five-storied Pagoda",
+  {n:5, lat:34.297195, lon:132.320739, name:"Five-storied Pagoda", q:"Itsukushima Five-storied Pagoda",
    where:"Next to Senjōkaku, on the hill above the shrine",
    html:`<ul>
 <li>Built in <b>1407</b>, about <b>27 m</b> tall. Its roofs are cypress bark.</li>
 <li>The style is mainly Japanese, with Chinese Zen touches: look at the strongly upturned corners of each roof.</li>
-<li>In 1868 the government split Shinto from Buddhism. The pagoda's Buddha statues were moved down to <b>Daiganji Temple</b> (stop 7).</li>
+<li>In 1868 the government split Shinto from Buddhism. The pagoda's Buddha statues were moved down to <b>Daiganji Temple</b> (stop 8).</li>
 <li>Today it belongs to Itsukushima Shrine and is <b>closed inside</b>.</li>
 <li>It is part of the <b>World Heritage</b> site (1996), together with Senjōkaku.</li>
 </ul>`},
-  {n:5, cap:"Left: high tide · Right: low tide, when you can walk out", lat:34.2973, lon:132.318135, name:"Ōtorii (Great Torii Gate)", q:"Itsukushima Shrine Great Torii",
+  {n:6, cap:"Left: high tide · Right: low tide, when you can walk out", lat:34.2973, lon:132.318135, name:"Ōtorii (Great Torii Gate)", q:"Itsukushima Shrine Great Torii",
    where:"In the sea, about 200 m out from the shrine",
    html:`<ul>
 <li>About <b>16 m</b> tall. Each main pillar is about <b>10 m around</b>. It is one of the largest wooden torii in Japan.</li>
@@ -150,7 +163,7 @@ const SPOTS = [
 <li>The name plaque reads 嚴嶋神社 on the sea side and 伊都岐島神社 on the shrine side.</li>
 <li>At low tide you can walk out to it. Please don't push coins into the cracks: the shrine says it damages the wood.</li>
 </ul>`},
-  {n:6, cap:"The corridors, built over the water", lat:34.29585, lon:132.320008, name:"Itsukushima Shrine", q:"Itsukushima Shrine",
+  {n:7, cap:"The corridors, built over the water", lat:34.29585, lon:132.320008, name:"Itsukushima Shrine", q:"Itsukushima Shrine",
    where:"Shrine entrance on the east side; one-way route, exit by the Noh stage",
    html:`<ul>
 <li>Founded in <b>593</b>, according to the shrine, by local leader <b>Saeki Kuramoto</b>.</li>
@@ -163,7 +176,7 @@ const SPOTS = [
 <li>In 1868 the new government nearly had the shrine burned as "too Buddhist". The head priest appealed and saved it, but its paint had to be stripped.</li>
 <li>Listed as <b>World Heritage in December 1996</b>, at the same time as Hiroshima's A-bomb Dome.</li>
 </ul>`},
-  {n:7, lat:34.29547, lon:132.318232, name:"Daiganji Temple", q:"Daiganji Temple Miyajima",
+  {n:8, lat:34.29547, lon:132.318232, name:"Daiganji Temple", q:"Daiganji Temple Miyajima",
    where:"Just past the shrine exit",
    html:`<ul>
 <li>A Shingon Buddhist temple, counted as one of Japan's <b>three great Benzaiten</b> temples. Benzaiten is the goddess of music, art and good fortune.</li>
@@ -172,7 +185,7 @@ const SPOTS = [
 <li>It holds the <b>oldest Buddha statue on Miyajima</b> (a seated Yakushi, the healing Buddha), an Important Cultural Property.</li>
 <li>In <b>1866</b> it hosted the peace talks between the shogun's envoy <b>Katsu Kaishū</b> and the Chōshū clan.</li>
 </ul>`},
-  {n:8, lat:34.294617, lon:132.318204, name:"Tahōtō Pagoda", q:"Tahoto Pagoda Miyajima",
+  {n:9, lat:34.294617, lon:132.318204, name:"Tahōtō Pagoda", q:"Tahoto Pagoda Miyajima",
    where:"On the small hill south-west of the shrine, up the stone steps",
    html:`<ul>
 <li>Built in <b>1523</b>, with a cypress-bark roof. It is an Important Cultural Property.</li>
@@ -182,17 +195,19 @@ const SPOTS = [
 <li>That battle is called one of Japan's three famous surprise attacks. Mōri then ruled the area and took care of the shrine.</li>
 <li>It's a quiet spot looking over the shrine roofs, with cherry blossoms in spring.</li>
 </ul>`},
-  {n:9, lat:34.291743, lon:132.318562, name:"Daishō-in Temple", q:"Daisho-in Temple Miyajima",
+  {n:10, lat:34.291743, lon:132.318562, name:"Daishō-in Temple", q:"Daisho-in Temple Miyajima",
    where:"At the foot of Mt. Misen, about 500 m uphill from the shrine",
    html:`<ul>
-<li>According to tradition, founded by the monk <b>Kūkai</b> (Kōbō Daishi) in <b>806</b>. It is the <b>oldest temple</b> on the island.</li>
-<li>Until 1868 it <b>managed Itsukushima Shrine</b>, back when Shinto and Buddhism were mixed.</li>
-<li><b>Emperor Meiji</b> stayed here in 1885 when he visited the shrine.</li>
-<li>The <b>Dalai Lama</b> came in 2006 for the temple's 1,200th anniversary.</li>
-<li>It is full of statues and small halls, including many Buddhist saints and the Seven Lucky Gods.</li>
-<li>The <b>Daishō-in trail</b> to the Misen summit (about 2.5 km of stone steps) starts here.</li>
+<li><b>The most important temple on the island.</b> By tradition it was founded by the monk <b>Kūkai</b> (Kōbō Daishi) in <b>806</b>. It is the oldest temple on Miyajima, and Mt. Misen is its "mountain name".</li>
+<li>Until <b>1868</b> it was the shrine's <b>bettō-ji</b>, the Buddhist temple that ran Itsukushima Shrine. In those days Shinto and Buddhism were practised together.</li>
+<li>Its main hall was built as an <b>imperial prayer hall for Emperor Toba</b> (12th century). That made it close to <b>Ninna-ji</b> in Kyoto, where Toba's fifth son, Prince Kakushō, was head priest.</li>
+<li>In the late 1500s, Ninna-ji's 20th head priest, <b>Prince Ninjo</b>, looked after the temple himself. He was known as "Itsukushima Omuro".</li>
+<li>Today it is a main temple of the <b>Omuro school</b> of Shingon Buddhism, the same school as Ninna-ji.</li>
+<li>Main figures of worship: the <b>Eleven-headed Kannon</b> (Kannon Hall) and the <b>Wave-cutting Fudō Myōō</b> (Namikiri Fudō, Chokugan Hall).</li>
+<li><b>Emperor Meiji</b> stayed here in 1885 when he visited the shrine. The <b>Dalai Lama</b> came in 2006 for the temple's 1,200th anniversary.</li>
+<li>The eternal flame on Misen (stop 13) belongs to this temple. The <b>Daishō-in trail</b> to the summit (about 2.5 km of stone steps) starts here.</li>
 </ul>`},
-  {n:10, lat:34.293809, lon:132.325038, name:"Momijidani Park", q:"Momijidani Park Miyajima",
+  {n:11, lat:34.293809, lon:132.325038, name:"Momijidani Park", q:"Momijidani Park Miyajima",
    where:"Up the Momijidani River behind the shrine, on the way to the ropeway",
    html:`<ul>
 <li>"Momijidani" means <b>maple valley</b>. More than <b>200 maple trees</b> grow here, at their best in November.</li>
@@ -202,7 +217,7 @@ const SPOTS = [
 <li>Those stone check dams are now a national <b>Important Cultural Property</b>.</li>
 <li>Iwasō, the ryokan here (since 1854), hosted guests like Itō Hirobumi and the writer Natsume Sōseki.</li>
 </ul>`},
-  {n:11, cap:"The Momijidani Line's small gondolas", lat:34.293222, lon:132.326747, name:"Miyajima Ropeway", q:"Miyajima Ropeway Momijidani Station",
+  {n:12, cap:"The Momijidani Line's small gondolas", lat:34.293222, lon:132.326747, name:"Miyajima Ropeway", q:"Miyajima Ropeway Momijidani Station",
    where:"Momijidani Station, top of Momijidani Park (free shuttle bus from the park entrance)",
    html:`<ul>
 <li>Opened <b>April 1, 1959</b>. It has two lines; you change cars at <b>Kayatani</b> station (you can't leave the station there).</li>
@@ -211,7 +226,7 @@ const SPOTS = [
 <li>New Shishiiwa cabins started in <b>March 2026</b>, named <b>"Sora" (sky) and "Umi" (sea)</b>. They hold 35 people and are painted vermilion like the shrine.</li>
 <li>From <b>Shishiiwa</b> station there's a viewpoint right away. The summit is about <b>30 minutes</b> more on foot.</li>
 </ul>`},
-  {n:12, cap:"Reikadō Hall before the May 2026 fire", lat:34.278311, lon:132.319677, name:"Kiezu-no-Hi (Eternal Flame)", q:"Reikado Hall Miyajima",
+  {n:13, cap:"Reikadō Hall before the May 2026 fire", lat:34.278311, lon:132.319677, name:"Kiezu-no-Hi (Eternal Flame)", q:"Reikado Hall Miyajima",
    where:"Below the Misen summit, on the trail from the ropeway",
    html:`<ul>
 <li>In <b>806</b> the monk <b>Kūkai</b> trained here for 100 days. The fire he used has been kept burning for about <b>1,200 years</b>.</li>
@@ -221,7 +236,7 @@ const SPOTS = [
 <li>It has happened before: the hall burned in 2005, a monk carried the flame out on a candle, and the hall was rebuilt in 2006.</li>
 <li>⚠ Check with Daishō-in where the flame is being kept now before you bring guests.</li>
 </ul>`},
-  {n:13, lat:34.279592, lon:132.319611, name:"Mt. Misen Summit", q:"Mount Misen Observatory",
+  {n:14, lat:34.279592, lon:132.319611, name:"Mt. Misen Summit", q:"Mount Misen Observatory",
    where:"Summit observation deck, about 30 minutes' walk from Shishiiwa station",
    html:`<ul>
 <li>At <b>535 m</b>, the highest point on Miyajima.</li>
@@ -250,13 +265,26 @@ const PHOTOS = {
  ],
  "2": [
   {
+   "src": "img/kiyomori-statue.jpg",
+   "credit": "Photo: C2revenge · CC BY-SA 4.0 · Wikimedia Commons",
+   "page": "https://commons.wikimedia.org/wiki/File:%E5%B9%B3%E6%B8%85%E7%9B%9B%E5%83%8F%EF%BC%88%E5%8E%B3%E5%B3%B6%E7%A5%9E%E7%A4%BE%EF%BC%89.jpg",
+   "alt": "Statue of Taira no Kiyomori"
+  },
+  {
+   "src": "img/world-heritage-monument.jpg",
+   "credit": "Photo: tour guide",
+   "alt": "World Heritage monument"
+  }
+ ],
+ "3": [
+  {
    "src": "img/omotesando.jpg",
    "credit": "Photo: Malaiya · CC BY-SA 4.0 · Wikimedia Commons",
    "page": "https://commons.wikimedia.org/wiki/File:Miyajima_island_town.jpg",
    "alt": "Omotesando shopping street"
   }
  ],
- "3": [
+ "4": [
   {
    "src": "img/senjokaku.jpg",
    "credit": "Photo: Hyppolyte de Saint-Rambert · CC BY 4.0 · Wikimedia Commons",
@@ -264,7 +292,7 @@ const PHOTOS = {
    "alt": "Senjokaku hall"
   }
  ],
- "4": [
+ "5": [
   {
    "src": "img/five-storied-pagoda.jpg",
    "credit": "Photo: Balon Greyjoy · CC0 · Wikimedia Commons",
@@ -272,7 +300,7 @@ const PHOTOS = {
    "alt": "Five-storied Pagoda"
   }
  ],
- "5": [
+ "6": [
   {
    "src": "img/otorii-high-tide.jpg",
    "credit": "Photo: Balon Greyjoy · CC0 · Wikimedia Commons",
@@ -286,7 +314,7 @@ const PHOTOS = {
    "alt": "Otorii at low tide"
   }
  ],
- "6": [
+ "7": [
   {
    "src": "img/itsukushima-shrine.jpg",
    "credit": "Photo: Jakub Hałun · CC BY 4.0 · Wikimedia Commons",
@@ -294,7 +322,7 @@ const PHOTOS = {
    "alt": "Itsukushima Shrine corridors"
   }
  ],
- "7": [
+ "8": [
   {
    "src": "img/daiganji.jpg",
    "credit": "Photo: Daderot · CC0 · Wikimedia Commons",
@@ -302,7 +330,7 @@ const PHOTOS = {
    "alt": "Daiganji Temple"
   }
  ],
- "8": [
+ "9": [
   {
    "src": "img/tahoto.jpg",
    "credit": "Photo: Taisyo · CC BY 3.0 · Wikimedia Commons",
@@ -310,7 +338,7 @@ const PHOTOS = {
    "alt": "Tahoto Pagoda"
   }
  ],
- "9": [
+ "10": [
   {
    "src": "img/daishoin.jpg",
    "credit": "Photo: Daderot · CC0 · Wikimedia Commons",
@@ -318,7 +346,7 @@ const PHOTOS = {
    "alt": "Daisho-in Temple"
   }
  ],
- "10": [
+ "11": [
   {
    "src": "img/momijidani.jpg",
    "credit": "Photo: Steven Perez · CC BY-SA 2.0 · Wikimedia Commons",
@@ -326,7 +354,7 @@ const PHOTOS = {
    "alt": "Momijidani Park in autumn"
   }
  ],
- "11": [
+ "12": [
   {
    "src": "img/ropeway.jpg",
    "credit": "Photo: Naokijp · CC BY-SA 4.0 · Wikimedia Commons",
@@ -334,7 +362,7 @@ const PHOTOS = {
    "alt": "Miyajima Ropeway gondolas"
   }
  ],
- "12": [
+ "13": [
   {
    "src": "img/reikado.jpg",
    "credit": "Photo: Rickard Törnblad · CC BY-SA 4.0 · Wikimedia Commons",
@@ -342,7 +370,7 @@ const PHOTOS = {
    "alt": "Reikado Hall before the 2026 fire"
   }
  ],
- "13": [
+ "14": [
   {
    "src": "img/misen-summit.jpg",
    "credit": "Photo: Bermard Gagnon · CC BY-SA 3.0 · Wikimedia Commons",
